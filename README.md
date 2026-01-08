@@ -1,46 +1,204 @@
-# Getting Started with Create React App
+# HireMe Admin Panel
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A professional admin panel built with React Admin for managing the HireMe job posting platform.
 
-## Available Scripts
+## Features
 
-In the project directory, you can run:
+### 🎯 Dashboard
+- Real-time statistics for job posts, applications, and queue
+- Quick overview of system metrics
+- Beautiful Material-UI design
 
-### `npm start`
+### 📋 Job Posts Management
+- View all job posts with filtering and search
+- Create, edit, and delete job posts
+- View detailed job post information including questions and screening responses
+- Export job posts data
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+### 👥 Applicants Management
+- View all applications across all job posts
+- Filter by status (pending, in_queue, reviewed, shortlisted, rejected, hired)
+- View applicant profiles with avatars
+- See application ratings and screening responses
+- View answers to questions
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+### 🔄 Review Queue Management
+- Manage the review queue for applications
+- Send questions to specific applicants directly from the UI
+- Update queue status (queued, in_review, awaiting_response, completed, removed)
+- Add notes to queue items
+- Reorder queue positions
 
-### `npm test`
+## Technologies Used
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **React 18** - UI library
+- **TypeScript** - Type safety
+- **React Admin** - Admin panel framework
+- **Material-UI (MUI)** - UI components
+- **React Router** - Navigation
+- **Date-fns** - Date formatting
 
-### `npm run build`
+## Prerequisites
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- Node.js 16 or higher
+- npm or yarn
+- HireMe Backend API running on `http://localhost:3001` (or configure different URL in `.env`)
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+## Installation
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+1. Navigate to the admin panel directory:
+```bash
+cd hireme-admin
+```
 
-### `npm run eject`
+2. Install dependencies:
+```bash
+npm install
+```
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+3. Configure environment variables:
+   - Update `.env` file if needed
+   - Default API URL: `http://localhost:3001`
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Running the Application
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+### Development Mode
+```bash
+npm start
+```
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+The admin panel will open at `http://localhost:3000`
 
-## Learn More
+### Production Build
+```bash
+npm run build
+```
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+The build will be created in the `build` directory.
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Authentication
+
+### Admin-Only Access
+- Only users with `user_type = 'job_poster'` can log in
+- Job seekers cannot access the admin panel
+- Authentication is enforced at both login and API request levels
+
+### Login Credentials
+Use your Job Poster account credentials:
+- Email: your admin email
+- Password: your admin password
+
+## API Integration
+
+The admin panel integrates with the following backend APIs:
+
+### Job Posts
+- `GET /jobPost` - List all job posts
+- `GET /jobPost/:id` - Get job post details
+- `PUT /jobPost/:id` - Update job post
+- `DELETE /jobPost/:id` - Delete job post
+
+### Applicants
+- `GET /jobPost/applicants/all` - List all applicants
+
+### Queue
+- `GET /queue` - List queue items
+- `GET /queue/:queueId/next-step` - Get questions for a queue item
+- `POST /queue/send-question` - Send question to applicant
+- `POST /queue/add` - Add application to queue
+- `PUT /queue/poster/:queueItemId` - Update queue item
+- `DELETE /queue/poster/:queueItemId` - Remove from queue
+
+### Authentication
+- `POST /auth/login` - Admin login
+
+## Project Structure
+
+```
+hireme-admin/
+├── public/                  # Static files
+├── src/
+│   ├── resources/          # Resource components
+│   │   ├── jobPosts.tsx   # Job Posts management
+│   │   ├── queue.tsx      # Queue management
+│   │   └── applicants.tsx # Applicants management
+│   ├── authProvider.ts    # Authentication logic
+│   ├── dataProvider.ts    # API integration
+│   ├── Dashboard.tsx      # Main dashboard
+│   ├── App.tsx           # Main app component
+│   └── index.tsx         # App entry point
+├── .env                   # Environment variables
+├── package.json          # Dependencies
+└── README.md            # This file
+```
+
+## Features in Detail
+
+### Send Question to Applicant
+1. Navigate to the Review Queue
+2. Click "Send Question" on any queued application
+3. A dialog opens showing all available questions from the job post
+4. Select a question and click "Send"
+5. The queue status automatically updates to "Awaiting Response"
+
+### Managing Queue
+- Add applications to queue from the applicants list
+- Reorder queue items by position
+- Update status as you review applications
+- Add notes for each queue item
+- Remove applications from queue
+
+### Job Post Management
+- View all job details including:
+  - Company information
+  - Salary range
+  - Job type and workplace type
+  - Experience level
+  - Questions and screening responses
+- Edit job details
+- Delete job posts (soft delete)
+
+### Applicant Details
+- View complete applicant profiles
+- See all application details
+- Check screening responses (video/audio/transcription)
+- View answers to questions
+- See application ratings
+
+## Environment Variables
+
+The `.env` file:
+
+```env
+REACT_APP_API_URL=http://localhost:3001
+```
+
+Change the API URL to point to your backend server.
+
+## Security
+
+- JWT token-based authentication
+- Admin-only access enforcement
+- Secure token storage in localStorage
+- Automatic token injection in API requests
+- Auto-logout on authentication errors (401/403)
+
+## Troubleshooting
+
+### Login Failed
+- Ensure backend API is running
+- Check that you're using Job Poster credentials
+- Verify API URL in `.env`
+
+### API Errors
+- Check browser console for detailed error messages
+- Verify backend API is accessible
+- Check authentication token in localStorage
+
+### Build Errors
+- Clear node_modules and reinstall: `rm -rf node_modules && npm install`
+- Clear npm cache: `npm cache clean --force`
+
+## License
+
+Proprietary - All rights reserved

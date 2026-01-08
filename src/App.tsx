@@ -1,26 +1,65 @@
 import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { Admin, Resource } from 'react-admin';
+import { authProvider } from './authProvider';
+import { dataProvider } from './dataProvider';
+import { Dashboard } from './Dashboard';
+import { Layout } from './Layout';
+import { LoginPage } from './LoginPage';
+import { theme } from './theme';
+import { jobPostResource } from './resources/jobPosts';
+import { userResource } from './resources/users';
+import { adminApplicationResource } from './resources/adminApplications';
+import { rejectionFeedbackResource } from './resources/rejectionFeedback';
+import { interviewAuditResource } from './resources/interviewAudit';
 
-function App() {
+const App = () => {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <Admin
+      authProvider={authProvider}
+      dataProvider={dataProvider}
+      dashboard={Dashboard}
+      layout={Layout}
+      loginPage={LoginPage}
+      theme={theme}
+      title="HireMeUp Admin Panel"
+      disableTelemetry
+    >
+      {/* User Management - View, Block/Unblock */}
+      <Resource
+        name="users"
+        {...userResource}
+        options={{ label: 'User Management' }}
+      />
+
+      {/* Job Post Oversight - View Only */}
+      <Resource
+        name="jobPosts"
+        {...jobPostResource}
+        options={{ label: 'Job Posts' }}
+      />
+
+      {/* Application Moderation - Review Applications */}
+      <Resource
+        name="adminApplications"
+        {...adminApplicationResource}
+        options={{ label: 'Applications' }}
+      />
+
+      {/* Moderation - Rejection Feedback */}
+      <Resource
+        name="rejectionFeedback"
+        {...rejectionFeedbackResource}
+        options={{ label: 'Rejection Feedback' }}
+      />
+
+      {/* Moderation - Interview Audit */}
+      <Resource
+        name="interviewAudit"
+        {...interviewAuditResource}
+        options={{ label: 'Interview Audit' }}
+      />
+    </Admin>
   );
-}
+};
 
 export default App;
