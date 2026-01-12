@@ -1,27 +1,35 @@
-import React from 'react';
+import React from "react";
 import {
   List,
   Datagrid,
-  TextField,
-  DateField,
-  BooleanField,
   Show,
   SimpleShowLayout,
   FunctionField,
-  ChipField,
   TextInput,
   SelectInput,
   DateInput,
-  BooleanInput,
   ShowButton,
   FilterButton,
   TopToolbar,
   ExportButton,
-} from 'react-admin';
-import { Box, Typography, Avatar, Card, CardContent, Chip, Divider } from '@mui/material';
-import { VideoCall as VideoCallIcon, PlayCircle as PlayCircleIcon, CalendarToday, Videocam } from '@mui/icons-material';
-import { EnhancedChip } from '../components/shared/EnhancedChip';
-import { formatRelativeTime } from '../utils/dateFormatters';
+} from "react-admin";
+import {
+  Box,
+  Typography,
+  Avatar,
+  Card,
+  CardContent,
+  Chip,
+  Divider,
+} from "@mui/material";
+import {
+  VideoCall as VideoCallIcon,
+  PlayCircle as PlayCircleIcon,
+  CalendarToday,
+  Videocam,
+} from "@mui/icons-material";
+import { EnhancedChip } from "../components/shared/EnhancedChip";
+import { formatRelativeTime } from "../utils/dateFormatters";
 
 const interviewFilters = [
   <TextInput key="search" label="Search" source="search" alwaysOn />,
@@ -29,10 +37,10 @@ const interviewFilters = [
     key="status"
     source="status"
     choices={[
-      { id: 'scheduled', name: 'Scheduled' },
-      { id: 'in_progress', name: 'In Progress' },
-      { id: 'completed', name: 'Completed' },
-      { id: 'cancelled', name: 'Cancelled' },
+      { id: "scheduled", name: "Scheduled" },
+      { id: "in_progress", name: "In Progress" },
+      { id: "completed", name: "Completed" },
+      { id: "cancelled", name: "Cancelled" },
     ]}
   />,
   <DateInput key="startDate" label="From Date" source="startDate" />,
@@ -41,20 +49,20 @@ const interviewFilters = [
 
 const getStatusColor = (status: string) => {
   const statusColors: { [key: string]: string } = {
-    scheduled: '#2196f3',
-    in_progress: '#ff9800',
-    completed: '#4caf50',
-    cancelled: '#f44336',
+    scheduled: "#2196f3",
+    in_progress: "#ff9800",
+    completed: "#4caf50",
+    cancelled: "#f44336",
   };
-  return statusColors[status] || '#757575';
+  return statusColors[status] || "#757575";
 };
 
 const formatStatus = (status: string) => {
   const statusMap: { [key: string]: string } = {
-    scheduled: 'Scheduled',
-    in_progress: 'In Progress',
-    completed: 'Completed',
-    cancelled: 'Cancelled',
+    scheduled: "Scheduled",
+    in_progress: "In Progress",
+    completed: "Completed",
+    cancelled: "Cancelled",
   };
   return statusMap[status] || status;
 };
@@ -62,44 +70,49 @@ const formatStatus = (status: string) => {
 // Custom exporter for interview audit
 const interviewAuditExporter = (records: any[]) => {
   const headers = [
-    'Interviewee Name',
-    'Interviewee Email',
-    'Interviewer Name',
-    'Interviewer Email',
-    'Job Title',
-    'Status',
-    'Has Recording',
-    'Duration (minutes)',
-    'Scheduled',
-    'Started',
-    'Ended',
+    "Interviewee Name",
+    "Interviewee Email",
+    "Interviewer Name",
+    "Interviewer Email",
+    "Job Title",
+    "Status",
+    "Has Recording",
+    "Duration (minutes)",
+    "Scheduled",
+    "Started",
+    "Ended",
   ];
 
   const rows = records.map((record) => [
-    record.intervieweeName || '',
-    record.intervieweeEmail || '',
-    record.interviewerName || '',
-    record.interviewerEmail || '',
-    record.jobTitle || 'N/A',
-    formatStatus(record.status || ''),
-    record.recordingUrl ? 'Yes' : 'No',
-    record.durationMinutes || 'N/A',
+    record.intervieweeName || "",
+    record.intervieweeEmail || "",
+    record.interviewerName || "",
+    record.interviewerEmail || "",
+    record.jobTitle || "N/A",
+    formatStatus(record.status || ""),
+    record.recordingUrl ? "Yes" : "No",
+    record.durationMinutes || "N/A",
     new Date(record.scheduledAt).toLocaleString(),
-    record.startedAt ? new Date(record.startedAt).toLocaleString() : 'Not started',
-    record.endedAt ? new Date(record.endedAt).toLocaleString() : 'Not ended',
+    record.startedAt
+      ? new Date(record.startedAt).toLocaleString()
+      : "Not started",
+    record.endedAt ? new Date(record.endedAt).toLocaleString() : "Not ended",
   ]);
 
   const csvContent = [
-    headers.join(','),
-    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
-  ].join('\n');
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', `interview-audit-${new Date().toISOString().split('T')[0]}.csv`);
-  link.style.visibility = 'hidden';
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `interview-audit-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -116,7 +129,7 @@ export const InterviewAuditList = () => (
   <List
     filters={interviewFilters}
     actions={<ListActions />}
-    sort={{ field: 'scheduledAt', order: 'DESC' }}
+    sort={{ field: "scheduledAt", order: "DESC" }}
     exporter={interviewAuditExporter}
     perPage={20}
   >
@@ -132,10 +145,10 @@ export const InterviewAuditList = () => (
             </Avatar>
             <Box>
               <Typography variant="body2" fontWeight={500}>
-                {record.intervieweeName || 'N/A'}
+                {record.intervieweeName || "N/A"}
               </Typography>
               <Typography variant="caption" color="textSecondary">
-                {record.intervieweeEmail || ''}
+                {record.intervieweeEmail || ""}
               </Typography>
             </Box>
           </Box>
@@ -152,10 +165,10 @@ export const InterviewAuditList = () => (
             </Avatar>
             <Box>
               <Typography variant="body2" fontWeight={500}>
-                {record.interviewerName || 'N/A'}
+                {record.interviewerName || "N/A"}
               </Typography>
               <Typography variant="caption" color="textSecondary">
-                {record.interviewerEmail || ''}
+                {record.interviewerEmail || ""}
               </Typography>
             </Box>
           </Box>
@@ -167,7 +180,7 @@ export const InterviewAuditList = () => (
         sortBy="jobTitle"
         render={(record: any) => (
           <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
-            {record.jobTitle || 'N/A'}
+            {record.jobTitle || "N/A"}
           </Typography>
         )}
       />
@@ -181,11 +194,13 @@ export const InterviewAuditList = () => (
         label="Recording"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            {record.recordingUrl && <Videocam sx={{ fontSize: 18, color: '#4caf50' }} />}
+            {record.recordingUrl && (
+              <Videocam sx={{ fontSize: 18, color: "#4caf50" }} />
+            )}
             <Chip
-              label={record.recordingUrl ? 'Yes' : 'No'}
+              label={record.recordingUrl ? "Yes" : "No"}
               size="small"
-              color={record.recordingUrl ? 'success' : 'default'}
+              color={record.recordingUrl ? "success" : "default"}
               variant="outlined"
             />
           </Box>
@@ -197,7 +212,9 @@ export const InterviewAuditList = () => (
         sortBy="durationMinutes"
         render={(record: any) =>
           record.durationMinutes ? (
-            <Typography variant="body2">{record.durationMinutes} min</Typography>
+            <Typography variant="body2">
+              {record.durationMinutes} min
+            </Typography>
           ) : (
             <Typography variant="caption" color="textSecondary">
               N/A
@@ -211,8 +228,11 @@ export const InterviewAuditList = () => (
         sortBy="scheduledAt"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <CalendarToday sx={{ fontSize: 14, color: 'text.secondary' }} />
-            <Typography variant="body2" title={new Date(record.scheduledAt).toLocaleString()}>
+            <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
+            <Typography
+              variant="body2"
+              title={new Date(record.scheduledAt).toLocaleString()}
+            >
               {formatRelativeTime(record.scheduledAt)}
             </Typography>
           </Box>
@@ -239,14 +259,14 @@ export const InterviewAuditShow = () => (
                   <Typography variant="subtitle2">Interviewee</Typography>
                   <Box mt={1}>
                     <Typography variant="body1" fontWeight={500}>
-                      {record.intervieweeName || 'N/A'}
+                      {record.intervieweeName || "N/A"}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {record.intervieweeEmail || ''}
+                      {record.intervieweeEmail || ""}
                     </Typography>
-                    <Typography variant="caption" color="textSecondary">
+                    {/* <Typography variant="caption" color="textSecondary">
                       User ID: {record.intervieweeId}
-                    </Typography>
+                    </Typography> */}
                   </Box>
                 </Box>
 
@@ -254,14 +274,14 @@ export const InterviewAuditShow = () => (
                   <Typography variant="subtitle2">Interviewer</Typography>
                   <Box mt={1}>
                     <Typography variant="body1" fontWeight={500}>
-                      {record.interviewerName || 'N/A'}
+                      {record.interviewerName || "N/A"}
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      {record.interviewerEmail || ''}
+                      {record.interviewerEmail || ""}
                     </Typography>
-                    <Typography variant="caption" color="textSecondary">
+                    {/* <Typography variant="caption" color="textSecondary">
                       User ID: {record.interviewerId}
-                    </Typography>
+                    </Typography> */}
                   </Box>
                 </Box>
               </CardContent>
@@ -273,17 +293,17 @@ export const InterviewAuditShow = () => (
                 <Divider sx={{ my: 1 }} />
 
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Job Post:</strong> {record.jobTitle || 'N/A'}
+                  <strong>Job Post:</strong> {record.jobTitle || "N/A"}
                 </Typography>
 
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Status:</strong>{' '}
+                  <strong>Status:</strong>{" "}
                   <Chip
                     label={formatStatus(record.status)}
                     size="small"
                     sx={{
                       bgcolor: getStatusColor(record.status),
-                      color: 'white',
+                      color: "white",
                     }}
                   />
                 </Typography>
@@ -293,18 +313,21 @@ export const InterviewAuditShow = () => (
                 </Typography>
 
                 <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Scheduled At:</strong> {new Date(record.scheduledAt).toLocaleString()}
+                  <strong>Scheduled At:</strong>{" "}
+                  {new Date(record.scheduledAt).toLocaleString()}
                 </Typography>
 
                 {record.startedAt && (
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Started At:</strong> {new Date(record.startedAt).toLocaleString()}
+                    <strong>Started At:</strong>{" "}
+                    {new Date(record.startedAt).toLocaleString()}
                   </Typography>
                 )}
 
                 {record.endedAt && (
                   <Typography variant="body2" sx={{ mb: 1 }}>
-                    <strong>Ended At:</strong> {new Date(record.endedAt).toLocaleString()}
+                    <strong>Ended At:</strong>{" "}
+                    {new Date(record.endedAt).toLocaleString()}
                   </Typography>
                 )}
 
@@ -317,7 +340,10 @@ export const InterviewAuditShow = () => (
                 {record.notes && (
                   <Box mt={2}>
                     <Typography variant="subtitle2">Notes</Typography>
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', mt: 1 }}>
+                    <Typography
+                      variant="body2"
+                      sx={{ whiteSpace: "pre-wrap", mt: 1 }}
+                    >
                       {record.notes}
                     </Typography>
                   </Box>
@@ -334,12 +360,14 @@ export const InterviewAuditShow = () => (
                   <Box>
                     <Box display="flex" alignItems="center" gap={1} mb={2}>
                       <PlayCircleIcon color="primary" />
-                      <Typography variant="body1">Recording Available</Typography>
+                      <Typography variant="body1">
+                        Recording Available
+                      </Typography>
                     </Box>
                     <video
                       src={record.recordingUrl}
                       controls
-                      style={{ width: '100%', maxWidth: 800, borderRadius: 8 }}
+                      style={{ width: "100%", maxWidth: 800, borderRadius: 8 }}
                     />
                   </Box>
                 </CardContent>

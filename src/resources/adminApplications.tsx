@@ -1,14 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   List,
   Datagrid,
-  TextField,
-  DateField,
   Show,
   TabbedShowLayout,
   Tab,
   FunctionField,
-  ChipField,
   useDataProvider,
   useNotify,
   useRefresh,
@@ -20,7 +17,7 @@ import {
   FilterButton,
   TopToolbar,
   ExportButton,
-} from 'react-admin';
+} from "react-admin";
 import {
   Dialog,
   DialogTitle,
@@ -40,7 +37,7 @@ import {
   Card,
   CardContent,
   Divider,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Assignment as AssignmentIcon,
   Star as StarIcon,
@@ -48,29 +45,29 @@ import {
   ChangeCircle as ChangeCircleIcon,
   CalendarToday,
   Videocam,
-} from '@mui/icons-material';
-import { EnhancedChip } from '../components/shared/EnhancedChip';
-import { formatRelativeTime } from '../utils/dateFormatters';
+} from "@mui/icons-material";
+import { EnhancedChip } from "../components/shared/EnhancedChip";
+import { formatRelativeTime } from "../utils/dateFormatters";
 
 const UpdateNotesButton = ({ record }: any) => {
   const [open, setOpen] = useState(false);
-  const [notes, setNotes] = useState(record.notes || '');
+  const [notes, setNotes] = useState(record.notes || "");
   const dataProvider = useDataProvider();
   const notify = useNotify();
   const refresh = useRefresh();
 
   const handleSave = async () => {
     try {
-      await dataProvider.update('adminApplications', {
+      await dataProvider.update("adminApplications", {
         id: record.id,
         data: { notes },
         previousData: record,
       });
-      notify('Notes updated successfully', { type: 'success' });
+      notify("Notes updated successfully", { type: "success" });
       setOpen(false);
       refresh();
     } catch (error: any) {
-      notify(`Error: ${error.message}`, { type: 'error' });
+      notify(`Error: ${error.message}`, { type: "error" });
     }
   };
 
@@ -86,7 +83,13 @@ const UpdateNotesButton = ({ record }: any) => {
         <NoteIcon />
       </RAButton>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth onClick={(e) => e.stopPropagation()}>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="md"
+        fullWidth
+        onClick={(e) => e.stopPropagation()}
+      >
         <DialogTitle>Update Admin Notes</DialogTitle>
         <DialogContent onClick={(e) => e.stopPropagation()}>
           <MUITextField
@@ -100,8 +103,23 @@ const UpdateNotesButton = ({ record }: any) => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={(e) => { e.preventDefault(); setOpen(false); }}>Cancel</Button>
-          <Button onClick={(e) => { e.preventDefault(); handleSave(); }} variant="contained" color="primary" startIcon={<NoteIcon />}>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              handleSave();
+            }}
+            variant="contained"
+            color="primary"
+            startIcon={<NoteIcon />}
+          >
             Save Notes
           </Button>
         </DialogActions>
@@ -119,16 +137,16 @@ const UpdateRatingButton = ({ record }: any) => {
 
   const handleSave = async () => {
     try {
-      await dataProvider.update('adminApplications', {
+      await dataProvider.update("adminApplications", {
         id: record.id,
         data: { rating },
         previousData: record,
       });
-      notify('Rating updated successfully', { type: 'success' });
+      notify("Rating updated successfully", { type: "success" });
       setOpen(false);
       refresh();
     } catch (error: any) {
-      notify(`Error: ${error.message}`, { type: 'error' });
+      notify(`Error: ${error.message}`, { type: "error" });
     }
   };
 
@@ -144,7 +162,13 @@ const UpdateRatingButton = ({ record }: any) => {
         <StarIcon />
       </RAButton>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth onClick={(e) => e.stopPropagation()}>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        onClick={(e) => e.stopPropagation()}
+      >
         <DialogTitle>Rate Application</DialogTitle>
         <DialogContent onClick={(e) => e.stopPropagation()}>
           <Box display="flex" flexDirection="column" alignItems="center" py={3}>
@@ -163,8 +187,23 @@ const UpdateRatingButton = ({ record }: any) => {
           </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={(e) => { e.preventDefault(); setOpen(false); }}>Cancel</Button>
-          <Button onClick={(e) => { e.preventDefault(); handleSave(); }} variant="contained" color="primary" startIcon={<StarIcon />}>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              handleSave();
+            }}
+            variant="contained"
+            color="primary"
+            startIcon={<StarIcon />}
+          >
             Save Rating
           </Button>
         </DialogActions>
@@ -175,23 +214,23 @@ const UpdateRatingButton = ({ record }: any) => {
 
 const UpdateStatusButton = ({ record }: any) => {
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState(record.status || 'pending');
+  const [status, setStatus] = useState(record.status || "pending");
   const dataProvider = useDataProvider();
   const notify = useNotify();
   const refresh = useRefresh();
 
   const handleSave = async () => {
     try {
-      await dataProvider.update('adminApplications', {
+      await dataProvider.update("adminApplications", {
         id: record.id,
         data: { status },
         previousData: record,
       });
-      notify('Status updated successfully', { type: 'success' });
+      notify("Status updated successfully", { type: "success" });
       setOpen(false);
       refresh();
     } catch (error: any) {
-      notify(`Error: ${error.message}`, { type: 'error' });
+      notify(`Error: ${error.message}`, { type: "error" });
     }
   };
 
@@ -207,12 +246,22 @@ const UpdateStatusButton = ({ record }: any) => {
         <ChangeCircleIcon />
       </RAButton>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="sm" fullWidth onClick={(e) => e.stopPropagation()}>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        onClick={(e) => e.stopPropagation()}
+      >
         <DialogTitle>Update Application Status</DialogTitle>
         <DialogContent onClick={(e) => e.stopPropagation()}>
           <FormControl fullWidth sx={{ mt: 2 }}>
             <InputLabel>Status</InputLabel>
-            <Select value={status} onChange={(e) => setStatus(e.target.value)} label="Status">
+            <Select
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+              label="Status"
+            >
               <MenuItem value="pending">Pending</MenuItem>
               <MenuItem value="in_queue">In Queue</MenuItem>
               <MenuItem value="reviewed">Reviewed</MenuItem>
@@ -223,8 +272,23 @@ const UpdateStatusButton = ({ record }: any) => {
           </FormControl>
         </DialogContent>
         <DialogActions>
-          <Button onClick={(e) => { e.preventDefault(); setOpen(false); }}>Cancel</Button>
-          <Button onClick={(e) => { e.preventDefault(); handleSave(); }} variant="contained" color="primary" startIcon={<ChangeCircleIcon />}>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              handleSave();
+            }}
+            variant="contained"
+            color="primary"
+            startIcon={<ChangeCircleIcon />}
+          >
             Update Status
           </Button>
         </DialogActions>
@@ -239,12 +303,12 @@ const applicationFilters = [
     key="status"
     source="status"
     choices={[
-      { id: 'pending', name: 'Pending' },
-      { id: 'in_queue', name: 'In Queue' },
-      { id: 'reviewed', name: 'Reviewed' },
-      { id: 'shortlisted', name: 'Shortlisted' },
-      { id: 'rejected', name: 'Rejected' },
-      { id: 'hired', name: 'Hired' },
+      { id: "pending", name: "Pending" },
+      { id: "in_queue", name: "In Queue" },
+      { id: "reviewed", name: "Reviewed" },
+      { id: "shortlisted", name: "Shortlisted" },
+      { id: "rejected", name: "Rejected" },
+      { id: "hired", name: "Hired" },
     ]}
   />,
   <NumberInput key="minRating" label="Min Rating" source="minRating" />,
@@ -252,24 +316,24 @@ const applicationFilters = [
 
 const getStatusColor = (status: string) => {
   const statusColors: { [key: string]: string } = {
-    pending: '#ff9800',
-    in_queue: '#2196f3',
-    reviewed: '#9c27b0',
-    shortlisted: '#4caf50',
-    rejected: '#f44336',
-    hired: '#00c853',
+    pending: "#ff9800",
+    in_queue: "#2196f3",
+    reviewed: "#9c27b0",
+    shortlisted: "#4caf50",
+    rejected: "#f44336",
+    hired: "#00c853",
   };
-  return statusColors[status] || '#757575';
+  return statusColors[status] || "#757575";
 };
 
 const formatStatus = (status: string) => {
   const statusMap: { [key: string]: string } = {
-    pending: 'Pending',
-    in_queue: 'In Queue',
-    reviewed: 'Reviewed',
-    shortlisted: 'Shortlisted',
-    rejected: 'Rejected',
-    hired: 'Hired',
+    pending: "Pending",
+    in_queue: "In Queue",
+    reviewed: "Reviewed",
+    shortlisted: "Shortlisted",
+    rejected: "Rejected",
+    hired: "Hired",
   };
   return statusMap[status] || status;
 };
@@ -277,42 +341,47 @@ const formatStatus = (status: string) => {
 // Custom exporter for applications
 const applicationExporter = (records: any[]) => {
   const headers = [
-    'Applicant Name',
-    'Applicant Email',
-    'Job Title',
-    'Status',
-    'Rating',
-    'Has Video',
-    'Has Feedback',
-    'Interview Count',
-    'Applied',
-    'Reviewed',
+    "Applicant Name",
+    "Applicant Email",
+    "Job Title",
+    "Status",
+    "Rating",
+    "Has Video",
+    "Has Feedback",
+    "Interview Count",
+    "Applied",
+    "Reviewed",
   ];
 
   const rows = records.map((record) => [
-    record.applicantName || '',
-    record.applicantEmail || '',
-    record.jobTitle || '',
-    formatStatus(record.status || ''),
-    record.rating || 'Not rated',
-    record.hasVideo ? 'Yes' : 'No',
-    record.hasFeedback ? 'Yes' : 'No',
+    record.applicantName || "",
+    record.applicantEmail || "",
+    record.jobTitle || "",
+    formatStatus(record.status || ""),
+    record.rating || "Not rated",
+    record.hasVideo ? "Yes" : "No",
+    record.hasFeedback ? "Yes" : "No",
     record.interviewCount || 0,
     new Date(record.appliedAt).toLocaleString(),
-    record.reviewedAt ? new Date(record.reviewedAt).toLocaleString() : 'Not reviewed',
+    record.reviewedAt
+      ? new Date(record.reviewedAt).toLocaleString()
+      : "Not reviewed",
   ]);
 
   const csvContent = [
-    headers.join(','),
-    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(',')),
-  ].join('\n');
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
 
-  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  const link = document.createElement('a');
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
   const url = URL.createObjectURL(blob);
-  link.setAttribute('href', url);
-  link.setAttribute('download', `applications-${new Date().toISOString().split('T')[0]}.csv`);
-  link.style.visibility = 'hidden';
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `applications-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
@@ -329,7 +398,7 @@ export const AdminApplicationList = () => (
   <List
     filters={applicationFilters}
     actions={<ListActions />}
-    sort={{ field: 'appliedAt', order: 'DESC' }}
+    sort={{ field: "appliedAt", order: "DESC" }}
     exporter={applicationExporter}
     perPage={20}
   >
@@ -345,10 +414,10 @@ export const AdminApplicationList = () => (
             </Avatar>
             <Box>
               <Typography variant="body2" fontWeight={500}>
-                {record.applicantName || 'N/A'}
+                {record.applicantName || "N/A"}
               </Typography>
               <Typography variant="caption" color="textSecondary">
-                {record.applicantEmail || ''}
+                {record.applicantEmail || ""}
               </Typography>
             </Box>
           </Box>
@@ -359,7 +428,7 @@ export const AdminApplicationList = () => (
         sortable
         sortBy="jobTitle"
         render={(record: any) => (
-          <Typography variant="body2">{record.jobTitle || 'N/A'}</Typography>
+          <Typography variant="body2">{record.jobTitle || "N/A"}</Typography>
         )}
       />
       <FunctionField
@@ -391,11 +460,13 @@ export const AdminApplicationList = () => (
         sortBy="hasVideo"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            {record.hasVideo && <Videocam sx={{ fontSize: 18, color: '#4caf50' }} />}
+            {record.hasVideo && (
+              <Videocam sx={{ fontSize: 18, color: "#4caf50" }} />
+            )}
             <Chip
-              label={record.hasVideo ? 'Yes' : 'No'}
+              label={record.hasVideo ? "Yes" : "No"}
               size="small"
-              color={record.hasVideo ? 'success' : 'default'}
+              color={record.hasVideo ? "success" : "default"}
               variant="outlined"
             />
           </Box>
@@ -415,8 +486,11 @@ export const AdminApplicationList = () => (
         sortBy="appliedAt"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <CalendarToday sx={{ fontSize: 14, color: 'text.secondary' }} />
-            <Typography variant="body2" title={new Date(record.appliedAt).toLocaleString()}>
+            <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
+            <Typography
+              variant="body2"
+              title={new Date(record.appliedAt).toLocaleString()}
+            >
               {formatRelativeTime(record.appliedAt)}
             </Typography>
           </Box>
@@ -458,14 +532,14 @@ export const AdminApplicationShow = () => (
                     </Avatar>
                     <Box>
                       <Typography variant="h6">
-                        {record.applicantName || 'N/A'}
+                        {record.applicantName || "N/A"}
                       </Typography>
                       <Typography variant="body2" color="textSecondary">
-                        {record.applicantEmail || ''}
+                        {record.applicantEmail || ""}
                       </Typography>
-                      <Typography variant="caption" color="textSecondary">
+                      {/* <Typography variant="caption" color="textSecondary">
                         User ID: {record.applicantId}
-                      </Typography>
+                      </Typography> */}
                     </Box>
                   </Box>
                 </CardContent>
@@ -475,7 +549,9 @@ export const AdminApplicationShow = () => (
                 <CardContent>
                   <Typography variant="h6">Job Post</Typography>
                   <Divider sx={{ my: 1 }} />
-                  <Typography variant="body1">{record.jobTitle || 'N/A'}</Typography>
+                  <Typography variant="body1">
+                    {record.jobTitle || "N/A"}
+                  </Typography>
                   <Typography variant="caption" color="textSecondary">
                     Job Post ID: {record.jobPostId}
                   </Typography>
@@ -491,13 +567,15 @@ export const AdminApplicationShow = () => (
                     sx={{
                       mr: 1,
                       bgcolor: getStatusColor(record.status),
-                      color: 'white'
+                      color: "white",
                     }}
                   />
                   {record.rating && (
                     <Box display="inline-flex" alignItems="center" gap={1}>
                       <Rating value={record.rating} readOnly size="small" />
-                      <Typography variant="body2">({record.rating}/5)</Typography>
+                      <Typography variant="body2">
+                        ({record.rating}/5)
+                      </Typography>
                     </Box>
                   )}
                   <Typography variant="body2" sx={{ mt: 1 }}>
@@ -516,7 +594,7 @@ export const AdminApplicationShow = () => (
                   <CardContent>
                     <Typography variant="h6">Admin Notes</Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                    <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
                       {record.notes}
                     </Typography>
                   </CardContent>
@@ -542,13 +620,20 @@ export const AdminApplicationShow = () => (
                         src={record.mainVideoUrl}
                         controls
                         poster={record.thumbnailUrl}
-                        style={{ width: '100%', maxWidth: 800, marginTop: 8, borderRadius: 8 }}
+                        style={{
+                          width: "100%",
+                          maxWidth: 800,
+                          marginTop: 8,
+                          borderRadius: 8,
+                        }}
                       />
                     </Box>
                   </CardContent>
                 </Card>
               ) : (
-                <Typography color="textSecondary">No main video submission</Typography>
+                <Typography color="textSecondary">
+                  No main video submission
+                </Typography>
               )}
             </Box>
           )}
@@ -569,14 +654,22 @@ export const AdminApplicationShow = () => (
                       <Typography variant="body2">
                         Type: <Chip label={answer.answerType} size="small" />
                       </Typography>
-                      {answer.answerUrl && answer.answerType === 'video' && (
+                      {answer.answerUrl && answer.answerType === "video" && (
                         <Box mt={2}>
-                          <video src={answer.answerUrl} controls style={{ width: '100%', maxWidth: 600 }} />
+                          <video
+                            src={answer.answerUrl}
+                            controls
+                            style={{ width: "100%", maxWidth: 600 }}
+                          />
                         </Box>
                       )}
-                      {answer.answerUrl && answer.answerType === 'audio' && (
+                      {answer.answerUrl && answer.answerType === "audio" && (
                         <Box mt={2}>
-                          <audio src={answer.answerUrl} controls style={{ width: '100%', maxWidth: 600 }} />
+                          <audio
+                            src={answer.answerUrl}
+                            controls
+                            style={{ width: "100%", maxWidth: 600 }}
+                          />
                         </Box>
                       )}
                       {answer.transcription && (
@@ -610,13 +703,15 @@ export const AdminApplicationShow = () => (
                   <CardContent>
                     <Typography variant="h6">Rejection Feedback</Typography>
                     <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
+                    <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
                       {record.rejectionFeedback}
                     </Typography>
                   </CardContent>
                 </Card>
               ) : (
-                <Typography color="textSecondary">No rejection feedback</Typography>
+                <Typography color="textSecondary">
+                  No rejection feedback
+                </Typography>
               )}
             </Box>
           )}
@@ -632,17 +727,27 @@ export const AdminApplicationShow = () => (
                 record.interviews.map((interview: any, index: number) => (
                   <Card key={index} sx={{ mb: 2 }}>
                     <CardContent>
-                      <Typography variant="h6">Interview {index + 1}</Typography>
+                      <Typography variant="h6">
+                        Interview {index + 1}
+                      </Typography>
                       <Divider sx={{ my: 1 }} />
                       <Typography variant="body2">
                         Status: <Chip label={interview.status} size="small" />
                       </Typography>
                       <Typography variant="body2" sx={{ mt: 1 }}>
-                        Scheduled: {new Date(interview.scheduledAt).toLocaleString()}
+                        Scheduled:{" "}
+                        {new Date(interview.scheduledAt).toLocaleString()}
                       </Typography>
                       {interview.recordingUrl && (
                         <Typography variant="body2">
-                          Recording: <a href={interview.recordingUrl} target="_blank" rel="noopener noreferrer">View</a>
+                          Recording:{" "}
+                          <a
+                            href={interview.recordingUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                          >
+                            View
+                          </a>
                         </Typography>
                       )}
                     </CardContent>

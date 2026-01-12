@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState } from "react";
 import {
   List,
   Datagrid,
@@ -19,7 +19,7 @@ import {
   DeleteButton,
   EditButton,
   ShowButton,
-} from 'react-admin';
+} from "react-admin";
 import {
   Dialog,
   DialogTitle,
@@ -33,22 +33,20 @@ import {
   Box,
   Typography,
   Chip,
-} from '@mui/material';
+} from "@mui/material";
 import {
   Queue as QueueIcon,
   Send as SendIcon,
-  CheckCircle,
-  Cancel,
   CalendarToday,
-} from '@mui/icons-material';
-import { EnhancedChip } from '../components/shared/EnhancedChip';
-import { formatRelativeTime } from '../utils/dateFormatters';
-import { Avatar } from '@mui/material';
+} from "@mui/icons-material";
+import { EnhancedChip } from "../components/shared/EnhancedChip";
+import { formatRelativeTime } from "../utils/dateFormatters";
+import { Avatar } from "@mui/material";
 
 const SendQuestionButton = ({ record }: any) => {
   const [open, setOpen] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
-  const [selectedQuestion, setSelectedQuestion] = useState<string>('');
+  const [selectedQuestion, setSelectedQuestion] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const dataProvider = useDataProvider();
   const notify = useNotify();
@@ -58,12 +56,14 @@ const SendQuestionButton = ({ record }: any) => {
     setLoading(true);
     try {
       // Fetch questions using the next-step API
-      const auth = localStorage.getItem('auth');
+      const auth = localStorage.getItem("auth");
       if (!auth) return;
 
       const { token } = JSON.parse(auth);
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/queue/${record.id}/next-step`,
+        `${process.env.REACT_APP_API_URL || "http://localhost:3001"}/queue/${
+          record.id
+        }/next-step`,
         {
           headers: {
             Authorization: `Bearer ${token}`,
@@ -75,7 +75,7 @@ const SendQuestionButton = ({ record }: any) => {
       setQuestions(data.questions || []);
       setOpen(true);
     } catch (error: any) {
-      notify(`Error loading questions: ${error.message}`, { type: 'error' });
+      notify(`Error loading questions: ${error.message}`, { type: "error" });
     } finally {
       setLoading(false);
     }
@@ -83,21 +83,23 @@ const SendQuestionButton = ({ record }: any) => {
 
   const handleSend = async () => {
     if (!selectedQuestion) {
-      notify('Please select a question', { type: 'warning' });
+      notify("Please select a question", { type: "warning" });
       return;
     }
 
     try {
-      const auth = localStorage.getItem('auth');
+      const auth = localStorage.getItem("auth");
       if (!auth) return;
 
       const { token } = JSON.parse(auth);
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || 'http://localhost:3001'}/queue/send-question`,
+        `${
+          process.env.REACT_APP_API_URL || "http://localhost:3001"
+        }/queue/send-question`,
         {
-          method: 'POST',
+          method: "POST",
           headers: {
-            'Content-Type': 'application/json',
+            "Content-Type": "application/json",
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({
@@ -108,14 +110,14 @@ const SendQuestionButton = ({ record }: any) => {
       );
 
       if (!response.ok) {
-        throw new Error('Failed to send question');
+        throw new Error("Failed to send question");
       }
 
-      notify('Question sent successfully!', { type: 'success' });
+      notify("Question sent successfully!", { type: "success" });
       setOpen(false);
       refresh();
     } catch (error: any) {
-      notify(`Error sending question: ${error.message}`, { type: 'error' });
+      notify(`Error sending question: ${error.message}`, { type: "error" });
     }
   };
 
@@ -124,16 +126,22 @@ const SendQuestionButton = ({ record }: any) => {
       <RAButton
         label="Send Question"
         onClick={handleOpen}
-        disabled={loading || record.status === 'awaiting_response'}
+        disabled={loading || record.status === "awaiting_response"}
       >
         <SendIcon />
       </RAButton>
 
-      <Dialog open={open} onClose={() => setOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Send Question to Applicant</DialogTitle>
         <DialogContent>
           <Typography variant="body2" color="textSecondary" paragraph>
-            Select a question to send to {record.application?.applicant?.firstName}{' '}
+            Select a question to send to{" "}
+            {record.application?.applicant?.firstName}{" "}
             {record.application?.applicant?.lastName}
           </Typography>
 
@@ -143,7 +151,7 @@ const SendQuestionButton = ({ record }: any) => {
                 key={question.id}
                 disablePadding
                 sx={{
-                  border: '1px solid #e0e0e0',
+                  border: "1px solid #e0e0e0",
                   borderRadius: 1,
                   mb: 1,
                 }}
@@ -152,9 +160,9 @@ const SendQuestionButton = ({ record }: any) => {
                   selected={selectedQuestion === question.id}
                   onClick={() => setSelectedQuestion(question.id)}
                   sx={{
-                    '&.Mui-selected': {
-                      backgroundColor: '#e3f2fd',
-                      borderColor: '#2196f3',
+                    "&.Mui-selected": {
+                      backgroundColor: "#e3f2fd",
+                      borderColor: "#2196f3",
                     },
                   }}
                 >
@@ -201,17 +209,17 @@ const queueFilters = [
     key="status"
     source="status"
     choices={[
-      { id: 'queued', name: 'Queued' },
-      { id: 'in_review', name: 'In Review' },
-      { id: 'awaiting_response', name: 'Awaiting Response' },
-      { id: 'completed', name: 'Completed' },
-      { id: 'removed', name: 'Removed' },
+      { id: "queued", name: "Queued" },
+      { id: "in_review", name: "In Review" },
+      { id: "awaiting_response", name: "Awaiting Response" },
+      { id: "completed", name: "Completed" },
+      { id: "removed", name: "Removed" },
     ]}
   />,
 ];
 
 export const QueueList = () => (
-  <List filters={queueFilters} sort={{ field: 'position', order: 'ASC' }}>
+  <List filters={queueFilters} sort={{ field: "position", order: "ASC" }}>
     <Datagrid rowClick="show">
       <TextField source="position" label="Position" />
       <FunctionField
@@ -223,7 +231,9 @@ export const QueueList = () => (
             </Avatar>
             <Box>
               <Typography variant="body2" fontWeight={500}>
-                {`${record.application?.applicant?.firstName || ''} ${record.application?.applicant?.lastName || ''}`.trim() || 'N/A'}
+                {`${record.application?.applicant?.firstName || ""} ${
+                  record.application?.applicant?.lastName || ""
+                }`.trim() || "N/A"}
               </Typography>
             </Box>
           </Box>
@@ -232,7 +242,9 @@ export const QueueList = () => (
       <FunctionField
         label="Job Post"
         render={(record: any) => (
-          <Typography variant="body2">{record.application?.jobPost?.jobTitle || 'N/A'}</Typography>
+          <Typography variant="body2">
+            {record.application?.jobPost?.jobTitle || "N/A"}
+          </Typography>
         )}
       />
       <FunctionField
@@ -247,8 +259,11 @@ export const QueueList = () => (
         sortBy="queuedAt"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <CalendarToday sx={{ fontSize: 14, color: 'text.secondary' }} />
-            <Typography variant="body2" title={new Date(record.queuedAt).toLocaleString()}>
+            <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
+            <Typography
+              variant="body2"
+              title={new Date(record.queuedAt).toLocaleString()}
+            >
               {formatRelativeTime(record.queuedAt)}
             </Typography>
           </Box>
@@ -261,8 +276,11 @@ export const QueueList = () => (
         render={(record: any) =>
           record.reviewedAt ? (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <CalendarToday sx={{ fontSize: 14, color: 'text.secondary' }} />
-              <Typography variant="body2" title={new Date(record.reviewedAt).toLocaleString()}>
+              <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
+              <Typography
+                variant="body2"
+                title={new Date(record.reviewedAt).toLocaleString()}
+              >
                 {formatRelativeTime(record.reviewedAt)}
               </Typography>
             </Box>
@@ -299,7 +317,7 @@ export const QueueShow = () => (
         render={(record: any) => (
           <Box>
             <Typography variant="body1">
-              {record.application?.applicant?.firstName}{' '}
+              {record.application?.applicant?.firstName}{" "}
               {record.application?.applicant?.lastName}
             </Typography>
             <Typography variant="body2" color="textSecondary">
@@ -324,9 +342,12 @@ export const QueueShow = () => (
         label="Application Details"
         render={(record: any) => (
           <Box>
-            <Typography variant="subtitle2">Status: {record.application?.status}</Typography>
             <Typography variant="subtitle2">
-              Applied: {new Date(record.application?.appliedAt).toLocaleString()}
+              Status: {record.application?.status}
+            </Typography>
+            <Typography variant="subtitle2">
+              Applied:{" "}
+              {new Date(record.application?.appliedAt).toLocaleString()}
             </Typography>
             {record.application?.rating && (
               <Typography variant="subtitle2">
@@ -346,11 +367,11 @@ export const QueueEdit = () => (
       <SelectInput
         source="status"
         choices={[
-          { id: 'queued', name: 'Queued' },
-          { id: 'in_review', name: 'In Review' },
-          { id: 'awaiting_response', name: 'Awaiting Response' },
-          { id: 'completed', name: 'Completed' },
-          { id: 'removed', name: 'Removed' },
+          { id: "queued", name: "Queued" },
+          { id: "in_review", name: "In Review" },
+          { id: "awaiting_response", name: "Awaiting Response" },
+          { id: "completed", name: "Completed" },
+          { id: "removed", name: "Removed" },
         ]}
       />
       <TextInput source="notes" multiline rows={4} fullWidth />

@@ -2,8 +2,6 @@ import React from "react";
 import {
   List,
   Datagrid,
-  TextField,
-  DateField,
   Show,
   SimpleShowLayout,
   FunctionField,
@@ -221,9 +219,9 @@ export const RejectionFeedbackShow = () => (
                   <Typography variant="h6">
                     {record.applicantName || "N/A"}
                   </Typography>
-                  <Typography variant="caption" color="textSecondary">
+                  {/* <Typography variant="caption" color="textSecondary">
                     User ID: {record.applicantUserId}
-                  </Typography>
+                  </Typography> */}
                 </Box>
               </CardContent>
             </Card>

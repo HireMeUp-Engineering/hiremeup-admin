@@ -11,6 +11,8 @@ import { userResource } from './resources/users';
 import { adminApplicationResource } from './resources/adminApplications';
 import { rejectionFeedbackResource } from './resources/rejectionFeedback';
 import { interviewAuditResource } from './resources/interviewAudit';
+import { supportTicketResource } from './resources/supportTickets';
+import { feedbackResource } from './resources/feedback';
 
 const App = () => {
   return (
@@ -57,6 +59,20 @@ const App = () => {
         name="interviewAudit"
         {...interviewAuditResource}
         options={{ label: 'Interview Audit' }}
+      />
+
+      {/* Support & Feedback - Support Tickets */}
+      <Resource
+        name="supportTickets"
+        {...supportTicketResource}
+        options={{ label: 'Support Tickets' }}
+      />
+
+      {/* Support & Feedback - App Feedback */}
+      <Resource
+        name="feedback"
+        {...feedbackResource}
+        options={{ label: 'App Feedback' }}
       />
     </Admin>
   );

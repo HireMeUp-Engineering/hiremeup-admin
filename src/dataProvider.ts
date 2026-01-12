@@ -146,6 +146,46 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    if (resource === 'supportTickets') {
+      const { page, perPage } = params.pagination || { page: 1, perPage: 25 };
+      const { field, order } = params.sort || { field: 'createdAt', order: 'DESC' };
+      const query = {
+        page: page.toString(),
+        limit: perPage.toString(),
+        sortBy: field,
+        sortOrder: order,
+        ...params.filter,
+      };
+
+      const url = `${API_URL}/admin/support/tickets?${new URLSearchParams(query as any)}`;
+      const { json } = await httpClient(url);
+
+      return {
+        data: json.tickets.map((item: any) => ({ ...item, id: item.id })),
+        total: json.total,
+      };
+    }
+
+    if (resource === 'feedback') {
+      const { page, perPage } = params.pagination || { page: 1, perPage: 25 };
+      const { field, order } = params.sort || { field: 'createdAt', order: 'DESC' };
+      const query = {
+        page: page.toString(),
+        limit: perPage.toString(),
+        sortBy: field,
+        sortOrder: order,
+        ...params.filter,
+      };
+
+      const url = `${API_URL}/admin/support/feedback?${new URLSearchParams(query as any)}`;
+      const { json } = await httpClient(url);
+
+      return {
+        data: json.feedback.map((item: any) => ({ ...item, id: item.id })),
+        total: json.total,
+      };
+    }
+
     return baseDataProvider.getList(resource, params);
   },
 
@@ -178,6 +218,18 @@ export const dataProvider: DataProvider = {
       const url = `${API_URL}/admin/interviews/audit/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json, id: json.id } };
+    }
+
+    if (resource === 'supportTickets') {
+      const url = `${API_URL}/admin/support/tickets/${params.id}`;
+      const { json } = await httpClient(url);
+      return { data: { ...json.ticket, id: json.ticket.id } };
+    }
+
+    if (resource === 'feedback') {
+      const url = `${API_URL}/admin/support/feedback/${params.id}`;
+      const { json } = await httpClient(url);
+      return { data: { ...json.feedback, id: json.feedback.id } };
     }
 
     return baseDataProvider.getOne(resource, params);
@@ -256,6 +308,28 @@ export const dataProvider: DataProvider = {
           body: JSON.stringify({ status: params.data.status }),
         });
         return { data: { ...json, id: json.id } };
+      }
+    }
+
+    if (resource === 'supportTickets') {
+      // Handle status or priority update
+      if (params.data.action === 'updateStatus') {
+        const url = `${API_URL}/admin/support/tickets/${params.id}/status`;
+        const { json } = await httpClient(url, {
+          method: 'PATCH',
+          body: JSON.stringify({
+            status: params.data.status,
+            resolutionMessage: params.data.resolutionMessage,
+          }),
+        });
+        return { data: { ...json.ticket, id: json.ticket.id } };
+      } else if (params.data.action === 'updatePriority') {
+        const url = `${API_URL}/admin/support/tickets/${params.id}/priority`;
+        const { json } = await httpClient(url, {
+          method: 'PATCH',
+          body: JSON.stringify({ priority: params.data.priority }),
+        });
+        return { data: { ...json.ticket, id: json.ticket.id } };
       }
     }
 

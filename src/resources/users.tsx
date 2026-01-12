@@ -2,16 +2,10 @@ import React, { useState } from "react";
 import {
   List,
   Datagrid,
-  TextField,
-  DateField,
-  EmailField,
-  BooleanField,
   Show,
-  SimpleShowLayout,
   TabbedShowLayout,
   Tab,
   FunctionField,
-  ChipField,
   useDataProvider,
   useNotify,
   useRefresh,
@@ -23,7 +17,6 @@ import {
   FilterButton,
   TopToolbar,
   ExportButton,
-  useRecordContext,
 } from "react-admin";
 import { Link } from "react-router-dom";
 import {
