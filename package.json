@@ -2,6 +2,7 @@
   "name": "hireme-admin",
   "version": "0.1.0",
   "private": true,
+  "homepage": "/admin",
   "dependencies": {
     "@mui/icons-material": "^7.3.6",
     "@testing-library/dom": "^10.4.1",
