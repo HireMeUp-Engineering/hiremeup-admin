@@ -20,7 +20,11 @@ export const authProvider: AuthProvider = {
 
       console.log(data);
       // Check if user is admin
-      if (data.userType !== "admin") {
+      if (
+        !data.userRoles.some(
+          (role: { roleType: string }) => role.roleType === "admin"
+        )
+      ) {
         throw new Error("Access denied. Admin privileges required.");
       }
 
