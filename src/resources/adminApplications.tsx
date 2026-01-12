@@ -696,25 +696,40 @@ export const AdminApplicationShow = () => (
       <Tab label="Rejection Feedback">
         <FunctionField
           label=""
-          render={(record: any) => (
-            <Box>
-              {record.rejectionFeedback ? (
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">Rejection Feedback</Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
-                      {record.rejectionFeedback}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ) : (
+          render={(record: any) => {
+            const feedback = record?.rejectionFeedback;
+
+            // If there's no feedback or it's not an object, show fallback
+            if (!feedback || typeof feedback !== "object") {
+              return (
                 <Typography color="textSecondary">
                   No rejection feedback
                 </Typography>
-              )}
-            </Box>
-          )}
+              );
+            }
+
+            // Only render string fields explicitly
+            const title =
+              typeof feedback.title === "string"
+                ? feedback.title
+                : "Rejection Feedback";
+            const responseText =
+              typeof feedback.responseText === "string"
+                ? feedback.responseText
+                : "No details provided";
+
+            return (
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">{title}</Typography>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+                    {responseText}
+                  </Typography>
+                </CardContent>
+              </Card>
+            );
+          }}
         />
       </Tab>
 
