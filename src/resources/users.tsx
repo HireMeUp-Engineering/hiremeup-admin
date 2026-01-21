@@ -12,7 +12,6 @@ import {
   Button as RAButton,
   TextInput,
   SelectInput,
-  BooleanInput,
   ShowButton,
   FilterButton,
   TopToolbar,
@@ -184,7 +183,15 @@ const userFilters = [
       { id: "admin", name: "Admin" },
     ]}
   />,
-  <BooleanInput key="isActive" label="Active Only" source="isActive" />,
+  <SelectInput
+    key="isActive"
+    source="isActive"
+    label="Status"
+    choices={[
+      { id: "true", name: "Active" },
+      { id: "false", name: "Inactive" },
+    ]}
+  />,
 ];
 
 const ListActions = () => (

@@ -27,6 +27,8 @@ import {
   PlayCircle as PlayCircleIcon,
   CalendarToday,
   Videocam,
+  LocationOn,
+  Handshake,
 } from "@mui/icons-material";
 import { EnhancedChip } from "../components/shared/EnhancedChip";
 import { formatRelativeTime } from "../utils/dateFormatters";
@@ -41,6 +43,16 @@ const interviewFilters = [
       { id: "in_progress", name: "In Progress" },
       { id: "completed", name: "Completed" },
       { id: "cancelled", name: "Cancelled" },
+    ]}
+  />,
+  <SelectInput
+    key="interviewType"
+    source="interviewType"
+    label="Interview Type"
+    choices={[
+      { id: "video", name: "Video" },
+      { id: "in_person", name: "In Person" },
+      { id: "extend_offer", name: "Extend Offer" },
     ]}
   />,
   <DateInput key="startDate" label="From Date" source="startDate" />,
@@ -67,6 +79,35 @@ const formatStatus = (status: string) => {
   return statusMap[status] || status;
 };
 
+const getInterviewTypeColor = (type: string) => {
+  const typeColors: { [key: string]: string } = {
+    video: "#2196f3",
+    in_person: "#9c27b0",
+    extend_offer: "#4caf50",
+  };
+  return typeColors[type] || "#757575";
+};
+
+const formatInterviewType = (type: string) => {
+  const typeMap: { [key: string]: string } = {
+    video: "Video",
+    in_person: "In Person",
+    extend_offer: "Extend Offer",
+  };
+  return typeMap[type] || type || "Video";
+};
+
+const getInterviewTypeIcon = (type: string) => {
+  switch (type) {
+    case "in_person":
+      return <LocationOn sx={{ fontSize: 16 }} />;
+    case "extend_offer":
+      return <Handshake sx={{ fontSize: 16 }} />;
+    default:
+      return <Videocam sx={{ fontSize: 16 }} />;
+  }
+};
+
 // Custom exporter for interview audit
 const interviewAuditExporter = (records: any[]) => {
   const headers = [
@@ -76,6 +117,10 @@ const interviewAuditExporter = (records: any[]) => {
     "Interviewer Email",
     "Job Title",
     "Status",
+    "Interview Type",
+    "Location",
+    "Is Video",
+    "Is Extend Offer",
     "Has Recording",
     "Duration (minutes)",
     "Scheduled",
@@ -90,6 +135,10 @@ const interviewAuditExporter = (records: any[]) => {
     record.interviewerEmail || "",
     record.jobTitle || "N/A",
     formatStatus(record.status || ""),
+    formatInterviewType(record.interviewType),
+    record.location || "N/A",
+    record.isVideo ? "Yes" : "No",
+    record.isExtendOffer ? "Yes" : "No",
     record.recordingUrl ? "Yes" : "No",
     record.durationMinutes || "N/A",
     new Date(record.scheduledAt).toLocaleString(),
@@ -189,6 +238,24 @@ export const InterviewAuditList = () => (
         sortable
         sortBy="status"
         render={(record: any) => <EnhancedChip status={record.status} />}
+      />
+      <FunctionField
+        label="Type"
+        sortable
+        sortBy="interviewType"
+        render={(record: any) => (
+          <Box display="flex" alignItems="center" gap={0.5}>
+            {getInterviewTypeIcon(record.interviewType)}
+            <Chip
+              label={formatInterviewType(record.interviewType)}
+              size="small"
+              sx={{
+                bgcolor: getInterviewTypeColor(record.interviewType),
+                color: "white",
+              }}
+            />
+          </Box>
+        )}
       />
       <FunctionField
         label="Recording"
@@ -308,9 +375,43 @@ export const InterviewAuditShow = () => (
                   />
                 </Typography>
 
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Room ID:</strong> {record.roomId}
-                </Typography>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography variant="body2">
+                    <strong>Interview Type:</strong>
+                  </Typography>
+                  {getInterviewTypeIcon(record.interviewType)}
+                  <Chip
+                    label={formatInterviewType(record.interviewType)}
+                    size="small"
+                    sx={{
+                      bgcolor: getInterviewTypeColor(record.interviewType),
+                      color: "white",
+                    }}
+                  />
+                  {record.isExtendOffer && (
+                    <Chip
+                      label="Offer Meeting"
+                      size="small"
+                      color="success"
+                      variant="outlined"
+                    />
+                  )}
+                </Box>
+
+                {record.location && (
+                  <Box display="flex" alignItems="center" gap={0.5} mb={1}>
+                    <LocationOn sx={{ fontSize: 18, color: "text.secondary" }} />
+                    <Typography variant="body2">
+                      <strong>Location:</strong> {record.location}
+                    </Typography>
+                  </Box>
+                )}
+
+                {record.roomId && (
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Room ID:</strong> {record.roomId}
+                  </Typography>
+                )}
 
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   <strong>Scheduled At:</strong>{" "}
