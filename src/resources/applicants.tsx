@@ -10,7 +10,6 @@ import {
   ChipField,
   EmailField,
   NumberField,
-  FilterButton,
   TopToolbar,
   ExportButton,
   TextInput,
@@ -39,12 +38,12 @@ const applicantFilters = [
       { id: 'rejected', name: 'Rejected' },
       { id: 'hired', name: 'Hired' },
     ]}
+    alwaysOn
   />,
 ];
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton />
   </TopToolbar>
 );
@@ -54,6 +53,7 @@ export const ApplicantList = () => (
     filters={applicantFilters}
     actions={<ListActions />}
     sort={{ field: 'appliedAt', order: 'DESC' }}
+    storeKey={false}
   >
     <Datagrid rowClick="show">
       <FunctionField

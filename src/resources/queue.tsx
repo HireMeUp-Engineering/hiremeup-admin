@@ -215,11 +215,12 @@ const queueFilters = [
       { id: "completed", name: "Completed" },
       { id: "removed", name: "Removed" },
     ]}
+    alwaysOn
   />,
 ];
 
 export const QueueList = () => (
-  <List filters={queueFilters} sort={{ field: "position", order: "ASC" }}>
+  <List filters={queueFilters} sort={{ field: "position", order: "ASC" }} storeKey={false}>
     <Datagrid rowClick="show">
       <TextField source="position" label="Position" />
       <FunctionField

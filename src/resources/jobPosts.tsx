@@ -13,7 +13,6 @@ import {
   NumberInput,
   FunctionField,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -37,6 +36,7 @@ const jobPostFilters = [
       { id: "closed", name: "Closed" },
       { id: "archived", name: "Archived" },
     ]}
+    alwaysOn
   />,
 ];
 
@@ -99,7 +99,6 @@ const jobPostExporter = (records: any[]) => {
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton maxResults={5000} />
   </TopToolbar>
 );
@@ -111,9 +110,10 @@ export const JobPostList = () => (
     sort={{ field: "createdAt", order: "DESC" }}
     exporter={jobPostExporter}
     perPage={20}
+    storeKey={false}
   >
     <Datagrid rowClick="show">
-      <TextField source="jobTitle" label="Job Title" sortable />
+      <TextField source="jobTitle" label="Job Title" sortable={false} />
       <FunctionField
         label="Posted By"
         render={(record: any) => (
@@ -134,8 +134,6 @@ export const JobPostList = () => (
       />
       <FunctionField
         label="City"
-        sortable
-        sortBy="city"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <LocationOn sx={{ fontSize: 16, color: "text.secondary" }} />
@@ -143,17 +141,13 @@ export const JobPostList = () => (
           </Box>
         )}
       />
-      <TextField source="companyName" label="Company" sortable />
+      <TextField source="companyName" label="Company" sortable={false} />
       <FunctionField
         label="Status"
-        sortable
-        sortBy="status"
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Type"
-        sortable
-        sortBy="employmentType"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <WorkIcon sx={{ fontSize: 16, color: "text.secondary" }} />
@@ -163,7 +157,7 @@ export const JobPostList = () => (
           </Box>
         )}
       />
-      <NumberField source="applicationCount" label="Applications" sortable />
+      <NumberField source="applicationCount" label="Applications" sortable={false} />
       <FunctionField
         label="Created"
         sortable

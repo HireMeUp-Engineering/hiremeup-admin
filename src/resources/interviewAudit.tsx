@@ -9,7 +9,6 @@ import {
   SelectInput,
   DateInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -44,6 +43,7 @@ const interviewFilters = [
       { id: "completed", name: "Completed" },
       { id: "cancelled", name: "Cancelled" },
     ]}
+    alwaysOn
   />,
   <SelectInput
     key="interviewType"
@@ -54,9 +54,10 @@ const interviewFilters = [
       { id: "in_person", name: "In Person" },
       { id: "extend_offer", name: "Extend Offer" },
     ]}
+    alwaysOn
   />,
-  <DateInput key="startDate" label="From Date" source="startDate" />,
-  <DateInput key="endDate" label="To Date" source="endDate" />,
+  <DateInput key="startDate" label="From Date" source="startDate" alwaysOn />,
+  <DateInput key="endDate" label="To Date" source="endDate" alwaysOn />,
 ];
 
 const getStatusColor = (status: string) => {
@@ -169,7 +170,6 @@ const interviewAuditExporter = (records: any[]) => {
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton maxResults={5000} />
   </TopToolbar>
 );
@@ -181,12 +181,11 @@ export const InterviewAuditList = () => (
     sort={{ field: "scheduledAt", order: "DESC" }}
     exporter={interviewAuditExporter}
     perPage={20}
+    storeKey={false}
   >
     <Datagrid rowClick="show">
       <FunctionField
         label="Interviewee"
-        sortable
-        sortBy="intervieweeName"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
             <Avatar sx={{ width: 36, height: 36 }}>
@@ -205,8 +204,6 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Interviewer"
-        sortable
-        sortBy="interviewerName"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
             <Avatar sx={{ width: 36, height: 36 }}>
@@ -225,8 +222,6 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Job Post"
-        sortable
-        sortBy="jobTitle"
         render={(record: any) => (
           <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
             {record.jobTitle || "N/A"}
@@ -235,14 +230,10 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Status"
-        sortable
-        sortBy="status"
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Type"
-        sortable
-        sortBy="interviewType"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             {getInterviewTypeIcon(record.interviewType)}
@@ -275,8 +266,6 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Duration"
-        sortable
-        sortBy="durationMinutes"
         render={(record: any) =>
           record.durationMinutes ? (
             <Typography variant="body2">
@@ -400,7 +389,9 @@ export const InterviewAuditShow = () => (
 
                 {record.location && (
                   <Box display="flex" alignItems="center" gap={0.5} mb={1}>
-                    <LocationOn sx={{ fontSize: 18, color: "text.secondary" }} />
+                    <LocationOn
+                      sx={{ fontSize: 18, color: "text.secondary" }}
+                    />
                     <Typography variant="body2">
                       <strong>Location:</strong> {record.location}
                     </Typography>

@@ -8,7 +8,6 @@ import {
   TextInput,
   DateInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -31,8 +30,8 @@ import { formatRelativeTime } from "../utils/dateFormatters";
 
 const rejectionFilters = [
   <TextInput key="search" label="Search" source="search" alwaysOn />,
-  <DateInput key="startDate" label="From Date" source="startDate" />,
-  <DateInput key="endDate" label="To Date" source="endDate" />,
+  <DateInput key="startDate" label="From Date" source="startDate" alwaysOn />,
+  <DateInput key="endDate" label="To Date" source="endDate" alwaysOn />,
 ];
 
 const formatScreeningType = (type: string) => {
@@ -89,7 +88,6 @@ const rejectionFeedbackExporter = (records: any[]) => {
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton maxResults={5000} />
   </TopToolbar>
 );
@@ -101,6 +99,7 @@ export const RejectionFeedbackList = () => (
     sort={{ field: "createdAt", order: "DESC" }}
     exporter={rejectionFeedbackExporter}
     perPage={20}
+    storeKey={false}
   >
     <Datagrid rowClick="show">
       <FunctionField

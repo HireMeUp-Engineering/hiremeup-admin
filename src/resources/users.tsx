@@ -13,7 +13,6 @@ import {
   TextInput,
   SelectInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -182,6 +181,7 @@ const userFilters = [
       { id: "jobPoster", name: "Job Poster" },
       { id: "admin", name: "Admin" },
     ]}
+    alwaysOn
   />,
   <SelectInput
     key="isActive"
@@ -189,14 +189,14 @@ const userFilters = [
     label="Status"
     choices={[
       { id: "true", name: "Active" },
-      { id: "false", name: "Inactive" },
+      { id: "false", name: "Blocked" },
     ]}
+    alwaysOn
   />,
 ];
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton />
   </TopToolbar>
 );
@@ -206,6 +206,7 @@ export const UserList = () => (
     filters={userFilters}
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
+    storeKey={false}
   >
     <Datagrid rowClick="show">
       <FunctionField

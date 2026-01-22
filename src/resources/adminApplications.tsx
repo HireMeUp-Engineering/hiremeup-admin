@@ -14,7 +14,6 @@ import {
   SelectInput,
   NumberInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -310,8 +309,9 @@ const applicationFilters = [
       { id: "rejected", name: "Rejected" },
       { id: "hired", name: "Hired" },
     ]}
+    alwaysOn
   />,
-  <NumberInput key="minRating" label="Min Rating" source="minRating" />,
+  <NumberInput key="minRating" label="Min Rating" source="minRating" alwaysOn />,
 ];
 
 const getStatusColor = (status: string) => {
@@ -389,7 +389,6 @@ const applicationExporter = (records: any[]) => {
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton maxResults={5000} />
   </TopToolbar>
 );
@@ -401,12 +400,11 @@ export const AdminApplicationList = () => (
     sort={{ field: "appliedAt", order: "DESC" }}
     exporter={applicationExporter}
     perPage={20}
+    storeKey={false}
   >
     <Datagrid rowClick="show">
       <FunctionField
         label="Applicant"
-        sortable
-        sortBy="applicantName"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
             <Avatar sx={{ width: 36, height: 36 }}>
@@ -425,22 +423,16 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Job Post"
-        sortable
-        sortBy="jobTitle"
         render={(record: any) => (
           <Typography variant="body2">{record.jobTitle || "N/A"}</Typography>
         )}
       />
       <FunctionField
         label="Status"
-        sortable
-        sortBy="status"
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Rating"
-        sortable
-        sortBy="rating"
         render={(record: any) =>
           record.rating ? (
             <Box display="flex" alignItems="center" gap={0.5}>
@@ -456,8 +448,6 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Has Video"
-        sortable
-        sortBy="hasVideo"
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             {record.hasVideo && (
@@ -474,8 +464,6 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Interviews"
-        sortable
-        sortBy="interviewCount"
         render={(record: any) => (
           <Typography variant="body2">{record.interviewCount || 0}</Typography>
         )}

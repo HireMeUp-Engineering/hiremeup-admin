@@ -80,13 +80,16 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'users') {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
+      const { field, order } = params.sort || { field: 'createdAt', order: 'DESC' };
       const query = {
         page: page.toString(),
         limit: perPage.toString(),
+        sortBy: field,
+        sortOrder: order,
         ...params.filter,
       };
 
-      const url = `${API_URL}/admin/users?${new URLSearchParams(query)}`;
+      const url = `${API_URL}/admin/users?${new URLSearchParams(query as any)}`;
       const { json } = await httpClient(url);
 
       return {
@@ -97,11 +100,20 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'adminApplications') {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
-      const query = {
+      const { field, order } = params.sort || { field: 'appliedAt', order: 'DESC' };
+      // Map frontend filter names to backend expected names
+      const { minRating, ...restFilter } = params.filter || {};
+      const query: Record<string, string> = {
         page: page.toString(),
         limit: perPage.toString(),
-        ...params.filter,
+        sortBy: field,
+        sortOrder: order,
+        ...restFilter,
       };
+      // Map minRating to ratingMin for backend compatibility
+      if (minRating !== undefined) {
+        query.ratingMin = minRating;
+      }
 
       const url = `${API_URL}/admin/applications?${new URLSearchParams(query)}`;
       const { json } = await httpClient(url);
@@ -131,13 +143,16 @@ export const dataProvider: DataProvider = {
 
     if (resource === 'interviewAudit') {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
+      const { field, order } = params.sort || { field: 'scheduledAt', order: 'DESC' };
       const query = {
         page: page.toString(),
         limit: perPage.toString(),
+        sortBy: field,
+        sortOrder: order,
         ...params.filter,
       };
 
-      const url = `${API_URL}/admin/interviews/audit?${new URLSearchParams(query)}`;
+      const url = `${API_URL}/admin/interviews/audit?${new URLSearchParams(query as any)}`;
       const { json } = await httpClient(url);
 
       return {

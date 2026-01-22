@@ -13,7 +13,6 @@ import {
   Button as RAButton,
   TextInput,
   SelectInput,
-  FilterButton,
   TopToolbar,
   ExportButton,
   ShowButton,
@@ -61,6 +60,7 @@ const ticketFilters = [
       { id: "resolved", name: "Resolved" },
       { id: "closed", name: "Closed" },
     ]}
+    alwaysOn
   />,
   <SelectInput
     key="category"
@@ -71,6 +71,7 @@ const ticketFilters = [
       { id: "application_job", name: "Application/Job" },
       { id: "general", name: "General" },
     ]}
+    alwaysOn
   />,
   <SelectInput
     key="priority"
@@ -81,6 +82,7 @@ const ticketFilters = [
       { id: "high", name: "High" },
       { id: "urgent", name: "Urgent" },
     ]}
+    alwaysOn
   />,
 ];
 
@@ -304,7 +306,6 @@ const UpdatePriorityButton = ({ record }: any) => {
 // List Actions
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton />
   </TopToolbar>
 );
@@ -316,6 +317,7 @@ export const SupportTicketList = () => (
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
     perPage={25}
+    storeKey={false}
   >
     <Datagrid rowClick="show" bulkActionButtons={false}>
       <FunctionField
@@ -340,16 +342,20 @@ export const SupportTicketList = () => (
       <FunctionField
         label="Title"
         render={(record: any) => (
-          <Box>
-            <Typography variant="body2" fontWeight={600}>
-              {record.title}
-            </Typography>
-            <Chip
-              label={record.category.replace("_", " ")}
-              size="small"
-              variant="outlined"
-            />
-          </Box>
+          <Typography variant="body2" fontWeight={600}>
+            {record.title}
+          </Typography>
+        )}
+      />
+
+      <FunctionField
+        label="Category"
+        render={(record: any) => (
+          <Chip
+            label={record.category?.replace("_", " ") || "N/A"}
+            size="small"
+            variant="outlined"
+          />
         )}
       />
 

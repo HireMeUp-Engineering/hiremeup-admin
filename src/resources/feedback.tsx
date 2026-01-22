@@ -9,7 +9,6 @@ import {
   TextInput,
   SelectInput,
   NumberInput,
-  FilterButton,
   TopToolbar,
   ExportButton,
   ShowButton,
@@ -45,6 +44,7 @@ const feedbackFilters = [
       { id: "bug_report", name: "Bug Report" },
       { id: "general_feedback", name: "General Feedback" },
     ]}
+    alwaysOn
   />,
   <NumberInput
     key="minRating"
@@ -52,6 +52,7 @@ const feedbackFilters = [
     label="Min Rating"
     min={1}
     max={5}
+    alwaysOn
   />,
   <NumberInput
     key="maxRating"
@@ -59,6 +60,7 @@ const feedbackFilters = [
     label="Max Rating"
     min={1}
     max={5}
+    alwaysOn
   />,
   <SelectInput
     key="isFlagged"
@@ -68,6 +70,7 @@ const feedbackFilters = [
       { id: "true", name: "Yes" },
       { id: "false", name: "No" },
     ]}
+    alwaysOn
   />,
 ];
 
@@ -114,7 +117,6 @@ const getRatingColor = (rating: number) => {
 // List Actions
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton />
   </TopToolbar>
 );
@@ -126,6 +128,7 @@ export const FeedbackList = () => (
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
     perPage={25}
+    storeKey={false}
   >
     <Datagrid rowClick="show" bulkActionButtons={false}>
       <FunctionField
