@@ -109,44 +109,32 @@ const getInterviewTypeIcon = (type: string) => {
   }
 };
 
-// Custom exporter for interview audit
+// Custom exporter for interview audit - matches list view columns
 const interviewAuditExporter = (records: any[]) => {
   const headers = [
-    "Interviewee Name",
+    "Interviewee",
     "Interviewee Email",
-    "Interviewer Name",
+    "Interviewer",
     "Interviewer Email",
-    "Job Title",
+    "Job Post",
     "Status",
-    "Interview Type",
-    "Location",
-    "Is Video",
-    "Is Extend Offer",
-    "Has Recording",
-    "Duration (minutes)",
+    "Type",
+    "Recording",
+    "Duration",
     "Scheduled",
-    "Started",
-    "Ended",
   ];
 
   const rows = records.map((record) => [
-    record.intervieweeName || "",
+    record.intervieweeName || "N/A",
     record.intervieweeEmail || "",
-    record.interviewerName || "",
+    record.interviewerName || "N/A",
     record.interviewerEmail || "",
     record.jobTitle || "N/A",
     formatStatus(record.status || ""),
     formatInterviewType(record.interviewType),
-    record.location || "N/A",
-    record.isVideo ? "Yes" : "No",
-    record.isExtendOffer ? "Yes" : "No",
     record.recordingUrl ? "Yes" : "No",
-    record.durationMinutes || "N/A",
+    record.durationMinutes ? `${record.durationMinutes} min` : "N/A",
     new Date(record.scheduledAt).toLocaleString(),
-    record.startedAt
-      ? new Date(record.startedAt).toLocaleString()
-      : "Not started",
-    record.endedAt ? new Date(record.endedAt).toLocaleString() : "Not ended",
   ]);
 
   const csvContent = [

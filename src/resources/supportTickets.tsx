@@ -303,10 +303,59 @@ const UpdatePriorityButton = ({ record }: any) => {
   );
 };
 
+// Custom exporter for support tickets - matches list view columns
+const supportTicketExporter = (records: any[]) => {
+  const headers = [
+    "User",
+    "User Email",
+    "Title",
+    "Category",
+    "Status",
+    "Priority",
+    "Created",
+  ];
+
+  const formatValue = (value: string) => {
+    return value
+      ? value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+      : "N/A";
+  };
+
+  const rows = records.map((record) => [
+    record.userName || "Unknown",
+    record.userEmail || "No email",
+    record.title || "N/A",
+    formatValue(record.category),
+    formatValue(record.status),
+    record.priority ? formatValue(record.priority) : "Not Set",
+    new Date(record.createdAt).toLocaleString(),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `support-tickets-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 // List Actions
 const ListActions = () => (
   <TopToolbar>
-    <ExportButton />
+    <ExportButton maxResults={5000} />
   </TopToolbar>
 );
 
@@ -316,16 +365,28 @@ export const SupportTicketList = () => (
     filters={ticketFilters}
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
+    exporter={supportTicketExporter}
     perPage={25}
     storeKey={false}
   >
-    <Datagrid rowClick="show" bulkActionButtons={false} sx={{ tableLayout: "fixed", width: "100%" }}>
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="User"
         sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main", flexShrink: 0 }}>
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: "primary.main",
+                flexShrink: 0,
+              }}
+            >
               <PersonIcon sx={{ fontSize: 20 }} />
             </Avatar>
             <Box sx={{ overflow: "hidden" }}>

@@ -52,12 +52,12 @@ const formatEmploymentType = (type: string) => {
   return typeMap[type] || type;
 };
 
-// Custom exporter to handle export with proper field formatting
+// Custom exporter to handle export with proper field formatting - matches list view columns
 const jobPostExporter = (records: any[]) => {
   const headers = [
     "Job Title",
     "Posted By",
-    "Email",
+    "Poster Email",
     "City",
     "Company",
     "Status",
@@ -67,11 +67,11 @@ const jobPostExporter = (records: any[]) => {
   ];
 
   const rows = records.map((record) => [
-    record.jobTitle || "",
-    record.posterName || "",
+    record.jobTitle || "N/A",
+    record.posterName || "N/A",
     record.posterEmail || "",
-    record.city || "",
-    record.companyName || "",
+    record.city || "N/A",
+    record.companyName || "N/A",
     record.status || "",
     formatEmploymentType(record.employmentType || ""),
     record.applicationCount || 0,
@@ -146,8 +146,12 @@ export const JobPostList = () => (
         sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <LocationOn sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
-            <Typography variant="body2" noWrap>{record.city || "N/A"}</Typography>
+            <LocationOn
+              sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
+            />
+            <Typography variant="body2" noWrap>
+              {record.city || "N/A"}
+            </Typography>
           </Box>
         )}
       />
@@ -170,7 +174,9 @@ export const JobPostList = () => (
         sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <WorkIcon sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
+            <WorkIcon
+              sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
+            />
             <Typography variant="body2" noWrap>
               {formatEmploymentType(record.employmentType)}
             </Typography>

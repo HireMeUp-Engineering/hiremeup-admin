@@ -45,27 +45,36 @@ const formatScreeningType = (type: string) => {
   return typeMap[type] || type;
 };
 
-// Custom exporter for rejection feedback
+// Custom exporter for rejection feedback - matches list view columns
 const rejectionFeedbackExporter = (records: any[]) => {
   const headers = [
-    "Applicant Name",
-    "Job Title",
+    "Applicant",
+    "Job Post",
     "Screening Type",
-    "Rejection Reason",
-    "Has Video",
-    "Has Audio",
+    "Reason",
+    "Has Media",
     "Rejected On",
   ];
 
-  const rows = records.map((record) => [
-    record.applicantName || "N/A",
-    record.jobTitle || "N/A",
-    formatScreeningType(record.screeningType || ""),
-    record.responseText || "",
-    record.responseVideoUrl ? "Yes" : "No",
-    record.responseAudioUrl ? "Yes" : "No",
-    new Date(record.createdAt).toLocaleString(),
-  ]);
+  const rows = records.map((record) => {
+    let hasMedia = "None";
+    if (record.responseVideoUrl && record.responseAudioUrl) {
+      hasMedia = "Video, Audio";
+    } else if (record.responseVideoUrl) {
+      hasMedia = "Video";
+    } else if (record.responseAudioUrl) {
+      hasMedia = "Audio";
+    }
+
+    return [
+      record.applicantName || "N/A",
+      record.jobTitle || "N/A",
+      formatScreeningType(record.screeningType || ""),
+      record.responseText || "N/A",
+      hasMedia,
+      new Date(record.createdAt).toLocaleString(),
+    ];
+  });
 
   const csvContent = [
     headers.join(","),
@@ -124,7 +133,9 @@ export const RejectionFeedbackList = () => (
         sortBy="jobTitle"
         sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2" noWrap>{record.jobTitle || "N/A"}</Typography>
+          <Typography variant="body2" noWrap>
+            {record.jobTitle || "N/A"}
+          </Typography>
         )}
       />
       <FunctionField

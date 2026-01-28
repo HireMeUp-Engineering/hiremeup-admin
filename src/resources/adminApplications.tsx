@@ -311,7 +311,12 @@ const applicationFilters = [
     ]}
     alwaysOn
   />,
-  <NumberInput key="minRating" label="Min Rating" source="minRating" alwaysOn />,
+  <NumberInput
+    key="minRating"
+    label="Min Rating"
+    source="minRating"
+    alwaysOn
+  />,
 ];
 
 const getStatusColor = (status: string) => {
@@ -338,34 +343,28 @@ const formatStatus = (status: string) => {
   return statusMap[status] || status;
 };
 
-// Custom exporter for applications
+// Custom exporter for applications - matches list view columns
 const applicationExporter = (records: any[]) => {
   const headers = [
-    "Applicant Name",
+    "Applicant",
     "Applicant Email",
-    "Job Title",
+    "Job Post",
     "Status",
     "Rating",
     "Has Video",
-    "Has Feedback",
-    "Interview Count",
+    "Interviews",
     "Applied",
-    "Reviewed",
   ];
 
   const rows = records.map((record) => [
-    record.applicantName || "",
+    record.applicantName || "N/A",
     record.applicantEmail || "",
-    record.jobTitle || "",
+    record.jobTitle || "N/A",
     formatStatus(record.status || ""),
-    record.rating || "Not rated",
+    record.rating ? `${record.rating}/5` : "Not rated",
     record.hasVideo ? "Yes" : "No",
-    record.hasFeedback ? "Yes" : "No",
     record.interviewCount || 0,
     new Date(record.appliedAt).toLocaleString(),
-    record.reviewedAt
-      ? new Date(record.reviewedAt).toLocaleString()
-      : "Not reviewed",
   ]);
 
   const csvContent = [
@@ -426,7 +425,9 @@ export const AdminApplicationList = () => (
         label="Job Post"
         sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2" noWrap>{record.jobTitle || "N/A"}</Typography>
+          <Typography variant="body2" noWrap>
+            {record.jobTitle || "N/A"}
+          </Typography>
         )}
       />
       <FunctionField

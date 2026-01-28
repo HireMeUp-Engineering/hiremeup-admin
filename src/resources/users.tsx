@@ -195,9 +195,50 @@ const userFilters = [
   />,
 ];
 
+// Custom exporter for users - matches list view columns
+const userExporter = (records: any[]) => {
+  const headers = [
+    "User",
+    "Email",
+    "Role",
+    "Active",
+    "Profile Complete",
+    "Last Login",
+    "Joined",
+  ];
+
+  const rows = records.map((record) => [
+    `${record.firstName || ""} ${record.lastName || ""}`.trim() || "N/A",
+    record.email || "",
+    record.roles?.map((r: string) => r.replace("_", " ")).join(", ") || "N/A",
+    record.isActive ? "Active" : "Blocked",
+    record.profileComplete ? "Complete" : "Incomplete",
+    record.lastLogin ? new Date(record.lastLogin).toLocaleString() : "Never",
+    new Date(record.createdAt).toLocaleString(),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `users-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+};
+
 const ListActions = () => (
   <TopToolbar>
-    <ExportButton />
+    <ExportButton maxResults={5000} />
   </TopToolbar>
 );
 
@@ -206,6 +247,7 @@ export const UserList = () => (
     filters={userFilters}
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
+    exporter={userExporter}
     storeKey={false}
   >
     <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
@@ -234,8 +276,15 @@ export const UserList = () => (
         label="Email"
         sx={{ width: 220, minWidth: 220, maxWidth: 220 }}
         render={(record: any) => (
-          <Box display="flex" alignItems="center" gap={0.5} sx={{ overflow: "hidden" }}>
-            <EmailIcon sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={0.5}
+            sx={{ overflow: "hidden" }}
+          >
+            <EmailIcon
+              sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
+            />
             <MUILink
               component={Link}
               to={`/users/${record.id}/show`}
