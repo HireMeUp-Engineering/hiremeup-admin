@@ -55,24 +55,25 @@ export const ApplicantList = () => (
     sort={{ field: 'appliedAt', order: 'DESC' }}
     storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="Applicant"
+        sx={{ width: 250, minWidth: 250, maxWidth: 250 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
             <Avatar
               src={record.applicant?.profileImage}
               alt={`${record.applicant?.firstName} ${record.applicant?.lastName}`}
-              sx={{ width: 40, height: 40 }}
+              sx={{ width: 40, height: 40, flexShrink: 0 }}
             >
               {record.applicant?.firstName?.[0]}
               {record.applicant?.lastName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.applicant?.firstName} {record.applicant?.lastName}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.applicant?.email}
               </Typography>
             </Box>
@@ -81,16 +82,23 @@ export const ApplicantList = () => (
       />
       <FunctionField
         label="Job Post"
-        render={(record: any) => record.jobPost?.jobTitle || 'N/A'}
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
+        render={(record: any) => (
+          <Typography variant="body2" noWrap>
+            {record.jobPost?.jobTitle || 'N/A'}
+          </Typography>
+        )}
       />
       <FunctionField
         label="Status"
         sortable
         sortBy="status"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Rating"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) =>
           record.rating ? (
             <Box display="flex" alignItems="center" gap={0.5}>
@@ -108,10 +116,11 @@ export const ApplicantList = () => (
         label="Applied"
         sortable
         sortBy="appliedAt"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: 'text.secondary' }} />
-            <Typography variant="body2" title={new Date(record.appliedAt).toLocaleString()}>
+            <Typography variant="body2" noWrap title={new Date(record.appliedAt).toLocaleString()}>
               {formatRelativeTime(record.appliedAt)}
             </Typography>
           </Box>

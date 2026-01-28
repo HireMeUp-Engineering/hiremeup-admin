@@ -319,19 +319,20 @@ export const SupportTicketList = () => (
     perPage={25}
     storeKey={false}
   >
-    <Datagrid rowClick="show" bulkActionButtons={false}>
+    <Datagrid rowClick="show" bulkActionButtons={false} sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="User"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main", flexShrink: 0 }}>
               <PersonIcon sx={{ fontSize: 20 }} />
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={600}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={600} noWrap>
                 {record.userName || "Unknown"}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {record.userEmail || "No email"}
               </Typography>
             </Box>
@@ -341,8 +342,9 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Title"
+        sx={{ width: 220, minWidth: 220, maxWidth: 220 }}
         render={(record: any) => (
-          <Typography variant="body2" fontWeight={600}>
+          <Typography variant="body2" fontWeight={600} noWrap>
             {record.title}
           </Typography>
         )}
@@ -350,6 +352,7 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Category"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <Chip
             label={record.category?.replace("_", " ") || "N/A"}
@@ -361,6 +364,7 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Status"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Chip
             icon={getStatusIcon(record.status)}
@@ -373,6 +377,7 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Priority"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) =>
           record.priority ? (
             <Chip
@@ -388,8 +393,9 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Created"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" noWrap>
             {formatRelativeTime(record.createdAt)}
           </Typography>
         )}

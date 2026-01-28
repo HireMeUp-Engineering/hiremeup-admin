@@ -208,21 +208,22 @@ export const UserList = () => (
     sort={{ field: "createdAt", order: "DESC" }}
     storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="User"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
             <Avatar
               src={record.profileImage}
               alt={`${record.firstName} ${record.lastName}`}
-              sx={{ width: 40, height: 40 }}
+              sx={{ width: 40, height: 40, flexShrink: 0 }}
             >
               {record.firstName?.[0]}
               {record.lastName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.firstName} {record.lastName}
               </Typography>
             </Box>
@@ -231,15 +232,19 @@ export const UserList = () => (
       />
       <FunctionField
         label="Email"
+        sx={{ width: 220, minWidth: 220, maxWidth: 220 }}
         render={(record: any) => (
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <EmailIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+          <Box display="flex" alignItems="center" gap={0.5} sx={{ overflow: "hidden" }}>
+            <EmailIcon sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
             <MUILink
               component={Link}
               to={`/users/${record.id}/show`}
               sx={{
                 color: "#8759F2",
                 textDecoration: "none",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
                 "&:hover": {
                   textDecoration: "underline",
                 },
@@ -252,6 +257,7 @@ export const UserList = () => (
       />
       <FunctionField
         label="Role"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box>
             {record.roles?.map((role: string, index: number) => (
@@ -272,6 +278,7 @@ export const UserList = () => (
       />
       <FunctionField
         label="Active"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) => (
           <EnhancedChip
             status={record.isActive ? "active" : "rejected"}
@@ -281,6 +288,7 @@ export const UserList = () => (
       />
       <FunctionField
         label="Profile Complete"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <EnhancedChip
             status={record.profileComplete ? "completed" : "pending"}
@@ -292,11 +300,13 @@ export const UserList = () => (
         label="Last Login"
         sortable
         sortBy="lastLogin"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={
                 record.lastLogin
                   ? new Date(record.lastLogin).toLocaleString()
@@ -314,11 +324,13 @@ export const UserList = () => (
         label="Joined"
         sortable
         sortBy="createdAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.createdAt).toLocaleString()}
             >
               {formatRelativeTime(record.createdAt)}
@@ -328,6 +340,7 @@ export const UserList = () => (
       />
       <FunctionField
         label="Actions"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" gap={1}>
             <ShowButton />

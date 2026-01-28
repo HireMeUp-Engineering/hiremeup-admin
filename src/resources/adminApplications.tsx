@@ -402,19 +402,20 @@ export const AdminApplicationList = () => (
     perPage={20}
     storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="Applicant"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.applicantName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.applicantName || "N/A"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.applicantEmail || ""}
               </Typography>
             </Box>
@@ -423,16 +424,19 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Job Post"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2">{record.jobTitle || "N/A"}</Typography>
+          <Typography variant="body2" noWrap>{record.jobTitle || "N/A"}</Typography>
         )}
       />
       <FunctionField
         label="Status"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Rating"
+        sx={{ width: 150, minWidth: 150, maxWidth: 150 }}
         render={(record: any) =>
           record.rating ? (
             <Box display="flex" alignItems="center" gap={0.5}>
@@ -448,6 +452,7 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Has Video"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             {record.hasVideo && (
@@ -464,6 +469,7 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Interviews"
+        sx={{ width: 90, minWidth: 90, maxWidth: 90 }}
         render={(record: any) => (
           <Typography variant="body2">{record.interviewCount || 0}</Typography>
         )}
@@ -472,11 +478,13 @@ export const AdminApplicationList = () => (
         label="Applied"
         sortable
         sortBy="appliedAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.appliedAt).toLocaleString()}
             >
               {formatRelativeTime(record.appliedAt)}
@@ -486,6 +494,7 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Admin Actions"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" gap={1}>
             <ShowButton />

@@ -112,20 +112,29 @@ export const JobPostList = () => (
     perPage={20}
     storeKey={false}
   >
-    <Datagrid rowClick="show">
-      <TextField source="jobTitle" label="Job Title" sortable={false} />
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
+      <FunctionField
+        label="Job Title"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
+        render={(record: any) => (
+          <Typography variant="body2" noWrap>
+            {record.jobTitle || "N/A"}
+          </Typography>
+        )}
+      />
       <FunctionField
         label="Posted By"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 40, height: 40 }}>
+            <Avatar sx={{ width: 40, height: 40, flexShrink: 0 }}>
               {record.posterName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.posterName || "N/A"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.posterEmail || ""}
               </Typography>
             </Box>
@@ -134,39 +143,60 @@ export const JobPostList = () => (
       />
       <FunctionField
         label="City"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <LocationOn sx={{ fontSize: 16, color: "text.secondary" }} />
-            <Typography variant="body2">{record.city || "N/A"}</Typography>
+            <LocationOn sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
+            <Typography variant="body2" noWrap>{record.city || "N/A"}</Typography>
           </Box>
         )}
       />
-      <TextField source="companyName" label="Company" sortable={false} />
+      <FunctionField
+        label="Company"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
+        render={(record: any) => (
+          <Typography variant="body2" noWrap>
+            {record.companyName || "N/A"}
+          </Typography>
+        )}
+      />
       <FunctionField
         label="Status"
+        sx={{ width: 110, minWidth: 110, maxWidth: 110 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Type"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <WorkIcon sx={{ fontSize: 16, color: "text.secondary" }} />
-            <Typography variant="body2">
+            <WorkIcon sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }} />
+            <Typography variant="body2" noWrap>
               {formatEmploymentType(record.employmentType)}
             </Typography>
           </Box>
         )}
       />
-      <NumberField source="applicationCount" label="Applications" sortable={false} />
+      <FunctionField
+        label="Applications"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
+        render={(record: any) => (
+          <Typography variant="body2">
+            {record.applicationCount || 0}
+          </Typography>
+        )}
+      />
       <FunctionField
         label="Created"
         sortable
         sortBy="createdAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.createdAt).toLocaleString()}
             >
               {formatRelativeTime(record.createdAt)}

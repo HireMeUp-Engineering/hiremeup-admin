@@ -221,17 +221,24 @@ const queueFilters = [
 
 export const QueueList = () => (
   <List filters={queueFilters} sort={{ field: "position", order: "ASC" }} storeKey={false}>
-    <Datagrid rowClick="show">
-      <TextField source="position" label="Position" />
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
+      <FunctionField
+        label="Position"
+        sx={{ width: 80, minWidth: 80, maxWidth: 80 }}
+        render={(record: any) => (
+          <Typography variant="body2">{record.position}</Typography>
+        )}
+      />
       <FunctionField
         label="Applicant"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.application?.applicant?.firstName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {`${record.application?.applicant?.firstName || ""} ${
                   record.application?.applicant?.lastName || ""
                 }`.trim() || "N/A"}
@@ -242,8 +249,9 @@ export const QueueList = () => (
       />
       <FunctionField
         label="Job Post"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2">
+          <Typography variant="body2" noWrap>
             {record.application?.jobPost?.jobTitle || "N/A"}
           </Typography>
         )}
@@ -252,17 +260,20 @@ export const QueueList = () => (
         label="Status"
         sortable
         sortBy="status"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Queued At"
         sortable
         sortBy="queuedAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.queuedAt).toLocaleString()}
             >
               {formatRelativeTime(record.queuedAt)}
@@ -274,12 +285,14 @@ export const QueueList = () => (
         label="Reviewed At"
         sortable
         sortBy="reviewedAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) =>
           record.reviewedAt ? (
             <Box display="flex" alignItems="center" gap={0.5}>
               <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
               <Typography
                 variant="body2"
+                noWrap
                 title={new Date(record.reviewedAt).toLocaleString()}
               >
                 {formatRelativeTime(record.reviewedAt)}
@@ -294,6 +307,7 @@ export const QueueList = () => (
       />
       <FunctionField
         label="Actions"
+        sx={{ width: 220, minWidth: 220, maxWidth: 220 }}
         render={(record: any) => (
           <Box display="flex" gap={1}>
             <SendQuestionButton record={record} />

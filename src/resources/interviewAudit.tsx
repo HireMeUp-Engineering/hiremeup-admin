@@ -183,19 +183,20 @@ export const InterviewAuditList = () => (
     perPage={20}
     storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="Interviewee"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.intervieweeName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.intervieweeName || "N/A"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.intervieweeEmail || ""}
               </Typography>
             </Box>
@@ -204,16 +205,17 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Interviewer"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.interviewerName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.interviewerName || "N/A"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.interviewerEmail || ""}
               </Typography>
             </Box>
@@ -222,18 +224,21 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Job Post"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+          <Typography variant="body2" noWrap>
             {record.jobTitle || "N/A"}
           </Typography>
         )}
       />
       <FunctionField
         label="Status"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Type"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             {getInterviewTypeIcon(record.interviewType)}
@@ -250,6 +255,7 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Recording"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             {record.recordingUrl && (
@@ -266,6 +272,7 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Duration"
+        sx={{ width: 90, minWidth: 90, maxWidth: 90 }}
         render={(record: any) =>
           record.durationMinutes ? (
             <Typography variant="body2">
@@ -282,11 +289,13 @@ export const InterviewAuditList = () => (
         label="Scheduled"
         sortable
         sortBy="scheduledAt"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.scheduledAt).toLocaleString()}
             >
               {formatRelativeTime(record.scheduledAt)}

@@ -130,19 +130,20 @@ export const FeedbackList = () => (
     perPage={25}
     storeKey={false}
   >
-    <Datagrid rowClick="show" bulkActionButtons={false}>
+    <Datagrid rowClick="show" bulkActionButtons={false} sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="User"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
+            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main", flexShrink: 0 }}>
               <PersonIcon sx={{ fontSize: 20 }} />
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={600}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={600} noWrap>
                 {record.userName || "Unknown"}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {record.userEmail || "No email"}
               </Typography>
             </Box>
@@ -152,6 +153,7 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Rating"
+        sx={{ width: 160, minWidth: 160, maxWidth: 160 }}
         render={(record: any) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Rating value={record.rating} readOnly size="small" />
@@ -166,6 +168,7 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Category"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <Chip
             icon={getCategoryIcon(record.category)}
@@ -178,9 +181,10 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Description"
+        sx={{ width: 280, minWidth: 280, maxWidth: 280 }}
         render={(record: any) => (
           <Box>
-            <Typography variant="body2" noWrap sx={{ maxWidth: 300 }}>
+            <Typography variant="body2" noWrap>
               {record.description}
             </Typography>
             {record.isFlagged && (
@@ -198,6 +202,7 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Status"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) =>
           record.reviewedAt ? (
             <Chip
@@ -219,8 +224,9 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Submitted"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" noWrap>
             {formatRelativeTime(record.createdAt)}
           </Typography>
         )}

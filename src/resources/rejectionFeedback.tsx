@@ -101,17 +101,18 @@ export const RejectionFeedbackList = () => (
     perPage={20}
     storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="Applicant"
         sortable
         sortBy="applicantName"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.applicantName?.[0]}
             </Avatar>
-            <Typography variant="body2" fontWeight={500}>
+            <Typography variant="body2" fontWeight={500} noWrap>
               {record.applicantName || "N/A"}
             </Typography>
           </Box>
@@ -121,14 +122,16 @@ export const RejectionFeedbackList = () => (
         label="Job Post"
         sortable
         sortBy="jobTitle"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2">{record.jobTitle || "N/A"}</Typography>
+          <Typography variant="body2" noWrap>{record.jobTitle || "N/A"}</Typography>
         )}
       />
       <FunctionField
         label="Screening Type"
         sortable
         sortBy="screeningType"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <EnhancedChip
             status={
@@ -143,14 +146,16 @@ export const RejectionFeedbackList = () => (
       />
       <FunctionField
         label="Reason"
+        sx={{ width: 250, minWidth: 250, maxWidth: 250 }}
         render={(record: any) => (
-          <Typography variant="body2" noWrap sx={{ maxWidth: 300 }}>
+          <Typography variant="body2" noWrap>
             {record.responseText || "N/A"}
           </Typography>
         )}
       />
       <FunctionField
         label="Has Media"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box display="flex" gap={0.5} alignItems="center">
             {record.responseVideoUrl && (
@@ -187,11 +192,13 @@ export const RejectionFeedbackList = () => (
         label="Rejected On"
         sortable
         sortBy="createdAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.createdAt).toLocaleString()}
             >
               {formatRelativeTime(record.createdAt)}
