@@ -171,7 +171,11 @@ export const InterviewAuditList = () => (
     perPage={20}
     storeKey={false}
   >
-    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="Interviewee"
         sx={{ width: 200, minWidth: 200, maxWidth: 200 }}

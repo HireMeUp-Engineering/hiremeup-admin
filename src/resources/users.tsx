@@ -250,7 +250,11 @@ export const UserList = () => (
     exporter={userExporter}
     storeKey={false}
   >
-    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="User"
         sx={{ width: 180, minWidth: 180, maxWidth: 180 }}

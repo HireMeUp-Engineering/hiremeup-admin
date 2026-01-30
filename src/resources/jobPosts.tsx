@@ -2,8 +2,6 @@ import React from "react";
 import {
   List,
   Datagrid,
-  TextField,
-  NumberField,
   Show,
   SimpleShowLayout,
   Edit,
@@ -112,7 +110,11 @@ export const JobPostList = () => (
     perPage={20}
     storeKey={false}
   >
-    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="Job Title"
         sx={{ width: 180, minWidth: 180, maxWidth: 180 }}

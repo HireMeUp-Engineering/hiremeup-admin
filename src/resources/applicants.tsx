@@ -103,7 +103,11 @@ export const ApplicantList = () => (
     exporter={applicantExporter}
     storeKey={false}
   >
-    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="Applicant"
         sx={{ width: 250, minWidth: 250, maxWidth: 250 }}
