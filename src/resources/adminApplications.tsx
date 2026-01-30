@@ -27,7 +27,6 @@ import {
   Typography,
   Avatar,
   Chip,
-  TextField as MUITextField,
   Rating,
   Select,
   MenuItem,
@@ -40,92 +39,12 @@ import {
 import {
   Assignment as AssignmentIcon,
   Star as StarIcon,
-  Note as NoteIcon,
   ChangeCircle as ChangeCircleIcon,
   CalendarToday,
   Videocam,
 } from "@mui/icons-material";
 import { EnhancedChip } from "../components/shared/EnhancedChip";
 import { formatRelativeTime } from "../utils/dateFormatters";
-
-const UpdateNotesButton = ({ record }: any) => {
-  const [open, setOpen] = useState(false);
-  const [notes, setNotes] = useState(record.notes || "");
-  const dataProvider = useDataProvider();
-  const notify = useNotify();
-  const refresh = useRefresh();
-
-  const handleSave = async () => {
-    try {
-      await dataProvider.update("adminApplications", {
-        id: record.id,
-        data: { notes },
-        previousData: record,
-      });
-      notify("Notes updated successfully", { type: "success" });
-      setOpen(false);
-      refresh();
-    } catch (error: any) {
-      notify(`Error: ${error.message}`, { type: "error" });
-    }
-  };
-
-  return (
-    <>
-      <RAButton
-        label="Notes"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(true);
-        }}
-      >
-        <NoteIcon />
-      </RAButton>
-
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        maxWidth="md"
-        fullWidth
-        onClick={(e) => e.stopPropagation()}
-      >
-        <DialogTitle>Update Admin Notes</DialogTitle>
-        <DialogContent onClick={(e) => e.stopPropagation()}>
-          <MUITextField
-            label="Notes"
-            multiline
-            rows={6}
-            fullWidth
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              setOpen(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
-            variant="contained"
-            color="primary"
-            startIcon={<NoteIcon />}
-          >
-            Save Notes
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
-};
 
 const UpdateRatingButton = ({ record }: any) => {
   const [open, setOpen] = useState(false);

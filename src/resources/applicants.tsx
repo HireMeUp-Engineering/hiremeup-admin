@@ -8,8 +8,6 @@ import {
   SimpleShowLayout,
   FunctionField,
   ChipField,
-  EmailField,
-  NumberField,
   TopToolbar,
   ExportButton,
   TextInput,
