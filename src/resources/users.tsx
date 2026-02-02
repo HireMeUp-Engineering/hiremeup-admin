@@ -44,6 +44,10 @@ import {
   Assignment as AssignmentIcon,
   CalendarToday,
   Email as EmailIcon,
+  VideoLibrary as VideoIcon,
+  Article as ArticleIcon,
+  PlayCircleOutline as PlayIcon,
+  Visibility as ViewsIcon,
 } from "@mui/icons-material";
 import { EnhancedChip } from "../components/shared/EnhancedChip";
 import { formatRelativeTime } from "../utils/dateFormatters";
@@ -570,6 +574,233 @@ export const UserShow = () => (
                         Status: {profile.status} | Created:{" "}
                         {new Date(profile.createdAt).toLocaleDateString()}
                       </Typography>
+
+                      {/* Videos Section - For Job Seekers */}
+                      {profile.videos && profile.videos.length > 0 && (
+                        <Box sx={{ mt: 3 }}>
+                          <Box
+                            display="flex"
+                            alignItems="center"
+                            gap={1}
+                            mb={2}
+                          >
+                            <VideoIcon color="primary" />
+                            <Typography variant="subtitle1" fontWeight={600}>
+                              Videos ({profile.videos.length})
+                            </Typography>
+                          </Box>
+                          <Box
+                            sx={{
+                              display: "grid",
+                              gridTemplateColumns: {
+                                xs: "repeat(1, 1fr)",
+                                sm: "repeat(2, 1fr)",
+                                md: "repeat(3, 1fr)",
+                              },
+                              gap: 2,
+                            }}
+                          >
+                            {profile.videos.map(
+                              (video: any, vIndex: number) => (
+                                <Card
+                                  key={vIndex}
+                                  variant="outlined"
+                                  sx={{
+                                    bgcolor: video.isActive
+                                      ? "inherit"
+                                      : "#f5f5f5",
+                                    opacity: video.isActive ? 1 : 0.7,
+                                  }}
+                                >
+                                  <CardContent>
+                                    <Box
+                                      display="flex"
+                                      alignItems="center"
+                                      gap={1}
+                                      mb={1}
+                                    >
+                                      <PlayIcon
+                                        sx={{
+                                          fontSize: 20,
+                                          color: "primary.main",
+                                        }}
+                                      />
+                                      <Typography
+                                        variant="subtitle2"
+                                        fontWeight={500}
+                                        noWrap
+                                        title={video.title}
+                                      >
+                                        {video.title}
+                                      </Typography>
+                                    </Box>
+                                    {video.description && (
+                                      <Typography
+                                        variant="body2"
+                                        color="textSecondary"
+                                        sx={{
+                                          mb: 1,
+                                          display: "-webkit-box",
+                                          WebkitLineClamp: 2,
+                                          WebkitBoxOrient: "vertical",
+                                          overflow: "hidden",
+                                        }}
+                                      >
+                                        {video.description}
+                                      </Typography>
+                                    )}
+                                    <Box
+                                      display="flex"
+                                      justifyContent="space-between"
+                                      alignItems="center"
+                                      mt={1}
+                                    >
+                                      <Box
+                                        display="flex"
+                                        alignItems="center"
+                                        gap={0.5}
+                                      >
+                                        <ViewsIcon
+                                          sx={{
+                                            fontSize: 14,
+                                            color: "text.secondary",
+                                          }}
+                                        />
+                                        <Typography
+                                          variant="caption"
+                                          color="textSecondary"
+                                        >
+                                          {video.viewCount} views
+                                        </Typography>
+                                      </Box>
+                                      {video.duration && (
+                                        <Typography
+                                          variant="caption"
+                                          color="textSecondary"
+                                        >
+                                          {Math.floor(video.duration / 60)}:
+                                          {String(video.duration % 60).padStart(
+                                            2,
+                                            "0"
+                                          )}
+                                        </Typography>
+                                      )}
+                                    </Box>
+                                    <Box
+                                      display="flex"
+                                      justifyContent="space-between"
+                                      mt={1}
+                                    >
+                                      <Chip
+                                        label={
+                                          video.isActive ? "Active" : "Inactive"
+                                        }
+                                        size="small"
+                                        color={
+                                          video.isActive ? "success" : "default"
+                                        }
+                                      />
+                                      <Typography
+                                        variant="caption"
+                                        color="textSecondary"
+                                      >
+                                        Order: {video.order}
+                                      </Typography>
+                                    </Box>
+                                  </CardContent>
+                                </Card>
+                              )
+                            )}
+                          </Box>
+                        </Box>
+                      )}
+
+                      {/* Company Sections - For Job Posters */}
+                      {profile.companySections &&
+                        profile.companySections.length > 0 && (
+                          <Box sx={{ mt: 3 }}>
+                            <Box
+                              display="flex"
+                              alignItems="center"
+                              gap={1}
+                              mb={2}
+                            >
+                              <ArticleIcon color="primary" />
+                              <Typography variant="subtitle1" fontWeight={600}>
+                                Company Sections (
+                                {profile.companySections.length})
+                              </Typography>
+                            </Box>
+                            {profile.companySections.map(
+                              (section: any, sIndex: number) => (
+                                <Card
+                                  key={sIndex}
+                                  variant="outlined"
+                                  sx={{ mb: 2 }}
+                                >
+                                  <CardContent>
+                                    <Box
+                                      display="flex"
+                                      justifyContent="space-between"
+                                      alignItems="center"
+                                      mb={1}
+                                    >
+                                      <Typography
+                                        variant="subtitle2"
+                                        fontWeight={600}
+                                      >
+                                        {section.title}
+                                      </Typography>
+                                      <Box
+                                        display="flex"
+                                        alignItems="center"
+                                        gap={1}
+                                      >
+                                        <Chip
+                                          label={
+                                            section.isExpanded
+                                              ? "Expanded"
+                                              : "Collapsed"
+                                          }
+                                          size="small"
+                                          variant="outlined"
+                                        />
+                                        <Typography
+                                          variant="caption"
+                                          color="textSecondary"
+                                        >
+                                          Order: {section.order}
+                                        </Typography>
+                                      </Box>
+                                    </Box>
+                                    <Typography
+                                      variant="body2"
+                                      color="textSecondary"
+                                      sx={{
+                                        whiteSpace: "pre-wrap",
+                                        maxHeight: 150,
+                                        overflow: "auto",
+                                      }}
+                                    >
+                                      {section.content}
+                                    </Typography>
+                                    <Typography
+                                      variant="caption"
+                                      color="textSecondary"
+                                      display="block"
+                                      sx={{ mt: 1 }}
+                                    >
+                                      Created:{" "}
+                                      {new Date(
+                                        section.createdAt
+                                      ).toLocaleDateString()}
+                                    </Typography>
+                                  </CardContent>
+                                </Card>
+                              )
+                            )}
+                          </Box>
+                        )}
                     </CardContent>
                   </Card>
                 ))
