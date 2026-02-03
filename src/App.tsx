@@ -12,6 +12,7 @@ import { adminApplicationResource } from "./resources/adminApplications";
 import { interviewAuditResource } from "./resources/interviewAudit";
 import { supportTicketResource } from "./resources/supportTickets";
 import { feedbackResource } from "./resources/feedback";
+import { notificationResource } from "./resources/notifications";
 
 const App = () => {
   return (
@@ -72,6 +73,13 @@ const App = () => {
         name="feedback"
         {...feedbackResource}
         options={{ label: "App Feedback" }}
+      />
+
+      {/* Notification Management - Templates & Sent Notifications */}
+      <Resource
+        name="notifications"
+        {...notificationResource}
+        options={{ label: "Notifications" }}
       />
     </Admin>
   );

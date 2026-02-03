@@ -1,17 +1,17 @@
-import { DataProvider, fetchUtils } from 'react-admin';
-import simpleRestProvider from 'ra-data-simple-rest';
+import { DataProvider, fetchUtils } from "react-admin";
+import simpleRestProvider from "ra-data-simple-rest";
 
-const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:3001';
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3001";
 
 const httpClient = (url: string, options: fetchUtils.Options = {}) => {
   if (!options.headers) {
-    options.headers = new Headers({ Accept: 'application/json' });
+    options.headers = new Headers({ Accept: "application/json" });
   }
 
-  const auth = localStorage.getItem('auth');
+  const auth = localStorage.getItem("auth");
   if (auth) {
     const { token } = JSON.parse(auth);
-    (options.headers as Headers).set('Authorization', `Bearer ${token}`);
+    (options.headers as Headers).set("Authorization", `Bearer ${token}`);
   }
 
   return fetchUtils.fetchJson(url, options);
@@ -24,9 +24,12 @@ export const dataProvider: DataProvider = {
 
   // Custom implementations for specific resources
   getList: async (resource, params) => {
-    if (resource === 'jobPosts') {
+    if (resource === "jobPosts") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
-      const { field, order } = params.sort || { field: 'createdAt', order: 'DESC' };
+      const { field, order } = params.sort || {
+        field: "createdAt",
+        order: "DESC",
+      };
       const query = {
         page: page.toString(),
         limit: perPage.toString(),
@@ -35,7 +38,9 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
 
-      const url = `${API_URL}/admin/job-posts?${new URLSearchParams(query as any)}`;
+      const url = `${API_URL}/admin/job-posts?${new URLSearchParams(
+        query as any
+      )}`;
       const { json } = await httpClient(url);
 
       return {
@@ -44,7 +49,7 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'queue') {
+    if (resource === "queue") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
       const query = {
         page: page.toString(),
@@ -61,7 +66,7 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'applicants') {
+    if (resource === "applicants") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
       const query = {
         page: page.toString(),
@@ -69,7 +74,9 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
 
-      const url = `${API_URL}/jobPost/applicants/all?${new URLSearchParams(query)}`;
+      const url = `${API_URL}/jobPost/applicants/all?${new URLSearchParams(
+        query
+      )}`;
       const { json } = await httpClient(url);
 
       return {
@@ -78,9 +85,12 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'users') {
+    if (resource === "users") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
-      const { field, order } = params.sort || { field: 'createdAt', order: 'DESC' };
+      const { field, order } = params.sort || {
+        field: "createdAt",
+        order: "DESC",
+      };
       const query = {
         page: page.toString(),
         limit: perPage.toString(),
@@ -98,9 +108,12 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'adminApplications') {
+    if (resource === "adminApplications") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
-      const { field, order } = params.sort || { field: 'appliedAt', order: 'DESC' };
+      const { field, order } = params.sort || {
+        field: "appliedAt",
+        order: "DESC",
+      };
       // Map frontend filter names to backend expected names
       const { minRating, ...restFilter } = params.filter || {};
       const query: Record<string, string> = {
@@ -124,7 +137,7 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'rejectionFeedback') {
+    if (resource === "rejectionFeedback") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
       const query = {
         page: page.toString(),
@@ -132,7 +145,9 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
 
-      const url = `${API_URL}/admin/applications/rejection-feedback/list?${new URLSearchParams(query)}`;
+      const url = `${API_URL}/admin/applications/rejection-feedback/list?${new URLSearchParams(
+        query
+      )}`;
       const { json } = await httpClient(url);
 
       return {
@@ -141,9 +156,12 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'interviewAudit') {
+    if (resource === "interviewAudit") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 10 };
-      const { field, order } = params.sort || { field: 'scheduledAt', order: 'DESC' };
+      const { field, order } = params.sort || {
+        field: "scheduledAt",
+        order: "DESC",
+      };
       const query = {
         page: page.toString(),
         limit: perPage.toString(),
@@ -152,7 +170,9 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
 
-      const url = `${API_URL}/admin/interviews/audit?${new URLSearchParams(query as any)}`;
+      const url = `${API_URL}/admin/interviews/audit?${new URLSearchParams(
+        query as any
+      )}`;
       const { json } = await httpClient(url);
 
       return {
@@ -161,9 +181,12 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'supportTickets') {
+    if (resource === "supportTickets") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 25 };
-      const { field, order } = params.sort || { field: 'createdAt', order: 'DESC' };
+      const { field, order } = params.sort || {
+        field: "createdAt",
+        order: "DESC",
+      };
       const query = {
         page: page.toString(),
         limit: perPage.toString(),
@@ -172,7 +195,9 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
 
-      const url = `${API_URL}/admin/support/tickets?${new URLSearchParams(query as any)}`;
+      const url = `${API_URL}/admin/support/tickets?${new URLSearchParams(
+        query as any
+      )}`;
       const { json } = await httpClient(url);
 
       return {
@@ -181,9 +206,12 @@ export const dataProvider: DataProvider = {
       };
     }
 
-    if (resource === 'feedback') {
+    if (resource === "feedback") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 25 };
-      const { field, order } = params.sort || { field: 'createdAt', order: 'DESC' };
+      const { field, order } = params.sort || {
+        field: "createdAt",
+        order: "DESC",
+      };
       const query = {
         page: page.toString(),
         limit: perPage.toString(),
@@ -192,7 +220,9 @@ export const dataProvider: DataProvider = {
         ...params.filter,
       };
 
-      const url = `${API_URL}/admin/support/feedback?${new URLSearchParams(query as any)}`;
+      const url = `${API_URL}/admin/support/feedback?${new URLSearchParams(
+        query as any
+      )}`;
       const { json } = await httpClient(url);
 
       return {
@@ -201,166 +231,253 @@ export const dataProvider: DataProvider = {
       };
     }
 
+    // Notification Templates
+    if (resource === "notificationTemplates") {
+      const url = `${API_URL}/notifications/admin/templates`;
+      const { json } = await httpClient(url);
+
+      return {
+        data: json.templates.map((item: any) => ({ ...item, id: item.id })),
+        total: json.total,
+      };
+    }
+
+    // Sent Notifications
+    if (resource === "sentNotifications") {
+      const { page, perPage } = params.pagination || { page: 1, perPage: 25 };
+      const { field, order } = params.sort || {
+        field: "createdAt",
+        order: "DESC",
+      };
+      // Map pagination params to backend format
+      const query: Record<string, string> = {
+        currentPage: page.toString(),
+        pageLength: perPage.toString(),
+      };
+      // Add filters
+      if (params.filter) {
+        if (params.filter.type) query.type = params.filter.type;
+        if (params.filter.isRead) query.isRead = params.filter.isRead;
+        if (params.filter.search) query.search = params.filter.search;
+      }
+
+      const url = `${API_URL}/notifications/admin/notifications?${new URLSearchParams(
+        query
+      )}`;
+      const { json } = await httpClient(url);
+
+      return {
+        data: json.notifications.map((item: any) => ({ ...item, id: item.id })),
+        total: json.total,
+      };
+    }
+
     return baseDataProvider.getList(resource, params);
   },
 
   getOne: async (resource, params) => {
-    if (resource === 'jobPosts') {
+    if (resource === "jobPosts") {
       const url = `${API_URL}/admin/job-posts/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json.jobPost, id: json.jobPost.id } };
     }
 
-    if (resource === 'users') {
+    if (resource === "users") {
       const url = `${API_URL}/admin/users/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json.user, id: json.user.id } };
     }
 
-    if (resource === 'adminApplications') {
+    if (resource === "adminApplications") {
       const url = `${API_URL}/admin/applications/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json.application, id: json.application.id } };
     }
 
-    if (resource === 'rejectionFeedback') {
+    if (resource === "rejectionFeedback") {
       const url = `${API_URL}/admin/applications/rejection-feedback/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json, id: json.id } };
     }
 
-    if (resource === 'interviewAudit') {
+    if (resource === "interviewAudit") {
       const url = `${API_URL}/admin/interviews/audit/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json, id: json.id } };
     }
 
-    if (resource === 'supportTickets') {
+    if (resource === "supportTickets") {
       const url = `${API_URL}/admin/support/tickets/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json.ticket, id: json.ticket.id } };
     }
 
-    if (resource === 'feedback') {
+    if (resource === "feedback") {
       const url = `${API_URL}/admin/support/feedback/${params.id}`;
       const { json } = await httpClient(url);
       return { data: { ...json.feedback, id: json.feedback.id } };
+    }
+
+    // Notification Template by type
+    if (resource === "notificationTemplates") {
+      const url = `${API_URL}/notifications/admin/templates/${params.id}`;
+      const { json } = await httpClient(url);
+      return { data: { ...json, id: json.id || params.id } };
     }
 
     return baseDataProvider.getOne(resource, params);
   },
 
   create: async (resource, params) => {
-    if (resource === 'queue') {
+    if (resource === "queue") {
       const url = `${API_URL}/queue/add`;
       const { json } = await httpClient(url, {
-        method: 'POST',
+        method: "POST",
         body: JSON.stringify(params.data),
       });
       return { data: { ...json.queueItem, id: json.queueItem.id } };
+    }
+
+    // Send bulk notification
+    if (resource === "notificationSend") {
+      const url = `${API_URL}/notifications/admin/send`;
+      const { json } = await httpClient(url, {
+        method: "POST",
+        body: JSON.stringify(params.data),
+      });
+      return { data: { ...json, id: "send" } };
+    }
+
+    // Preview notification template
+    if (resource === "notificationTemplatePreview") {
+      const url = `${API_URL}/notifications/admin/templates/preview`;
+      const { json } = await httpClient(url, {
+        method: "POST",
+        body: JSON.stringify(params.data),
+      });
+      return { data: { ...json, id: "preview" } };
+    }
+
+    // Reset notification template to default
+    if (resource === "notificationTemplateReset") {
+      const url = `${API_URL}/notifications/admin/templates/reset/${params.data.type}`;
+      const { json } = await httpClient(url, {
+        method: "POST",
+      });
+      return { data: { ...json, id: json.id || params.data.type } };
     }
 
     return baseDataProvider.create(resource, params);
   },
 
   update: async (resource, params) => {
-    if (resource === 'queue') {
+    if (resource === "queue") {
       const url = `${API_URL}/queue/poster/${params.id}`;
       const { json } = await httpClient(url, {
-        method: 'PUT',
+        method: "PUT",
         body: JSON.stringify(params.data),
       });
       return { data: { ...json.queueItem, id: json.queueItem.id } };
     }
 
-    if (resource === 'jobPosts') {
+    if (resource === "jobPosts") {
       const url = `${API_URL}/jobPost/${params.id}`;
       const { json } = await httpClient(url, {
-        method: 'PUT',
+        method: "PUT",
         body: JSON.stringify(params.data),
       });
       return { data: { ...json.jobPost, id: json.jobPost.id } };
     }
 
-    if (resource === 'users') {
+    if (resource === "users") {
       // Handle block/unblock
-      if (params.data.action === 'block') {
+      if (params.data.action === "block") {
         const url = `${API_URL}/admin/users/${params.id}/block`;
         const { json } = await httpClient(url, {
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify({ reason: params.data.reason }),
         });
         return { data: { ...json.user, id: json.user.id } };
-      } else if (params.data.action === 'unblock') {
+      } else if (params.data.action === "unblock") {
         const url = `${API_URL}/admin/users/${params.id}/unblock`;
         const { json } = await httpClient(url, {
-          method: 'PATCH',
+          method: "PATCH",
         });
         return { data: { ...json.user, id: json.user.id } };
       }
     }
 
-    if (resource === 'adminApplications') {
+    if (resource === "adminApplications") {
       // Handle notes, rating, or status update
       if (params.data.notes !== undefined) {
         const url = `${API_URL}/admin/applications/${params.id}/notes`;
         const { json } = await httpClient(url, {
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify({ notes: params.data.notes }),
         });
         return { data: { ...json, id: json.id } };
       } else if (params.data.rating !== undefined) {
         const url = `${API_URL}/admin/applications/${params.id}/rating`;
         const { json } = await httpClient(url, {
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify({ rating: params.data.rating }),
         });
         return { data: { ...json, id: json.id } };
       } else if (params.data.status !== undefined) {
         const url = `${API_URL}/admin/applications/${params.id}/status`;
         const { json } = await httpClient(url, {
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify({ status: params.data.status }),
         });
         return { data: { ...json, id: json.id } };
       }
     }
 
-    if (resource === 'supportTickets') {
+    if (resource === "supportTickets") {
       // Handle status or priority update
-      if (params.data.action === 'updateStatus') {
+      if (params.data.action === "updateStatus") {
         const url = `${API_URL}/admin/support/tickets/${params.id}/status`;
         const { json } = await httpClient(url, {
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify({
             status: params.data.status,
             resolutionMessage: params.data.resolutionMessage,
           }),
         });
         return { data: { ...json.ticket, id: json.ticket.id } };
-      } else if (params.data.action === 'updatePriority') {
+      } else if (params.data.action === "updatePriority") {
         const url = `${API_URL}/admin/support/tickets/${params.id}/priority`;
         const { json } = await httpClient(url, {
-          method: 'PATCH',
+          method: "PATCH",
           body: JSON.stringify({ priority: params.data.priority }),
         });
         return { data: { ...json.ticket, id: json.ticket.id } };
       }
     }
 
+    // Update notification template
+    if (resource === "notificationTemplates") {
+      const url = `${API_URL}/notifications/admin/templates/${params.id}`;
+      const { json } = await httpClient(url, {
+        method: "PUT",
+        body: JSON.stringify(params.data),
+      });
+      return { data: { ...json, id: json.id || params.id } };
+    }
+
     return baseDataProvider.update(resource, params);
   },
 
   delete: async (resource, params) => {
-    if (resource === 'queue') {
+    if (resource === "queue") {
       const url = `${API_URL}/queue/poster/${params.id}`;
-      await httpClient(url, { method: 'DELETE' });
+      await httpClient(url, { method: "DELETE" });
       return { data: { id: params.id } as any };
     }
 
-    if (resource === 'jobPosts') {
+    if (resource === "jobPosts") {
       const url = `${API_URL}/jobPost/${params.id}`;
-      await httpClient(url, { method: 'DELETE' });
+      await httpClient(url, { method: "DELETE" });
       return { data: { id: params.id } as any };
     }
 
