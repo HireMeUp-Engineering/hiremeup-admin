@@ -40,6 +40,7 @@ import {
   People as PeopleIcon,
   Block as BlockIcon,
   CheckCircle as UnblockIcon,
+  DeleteForever as DeleteForeverIcon,
   Work as WorkIcon,
   Assignment as AssignmentIcon,
   CalendarToday,
@@ -48,6 +49,7 @@ import {
   Article as ArticleIcon,
   PlayCircleOutline as PlayIcon,
   Close as CloseIcon,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
 import IconButton from "@mui/material/IconButton";
 import { EnhancedChip } from "../components/shared/EnhancedChip";
@@ -172,6 +174,215 @@ const UnblockUserButton = ({ record }: any) => {
     >
       <UnblockIcon />
     </RAButton>
+  );
+};
+
+const DeleteUserButton = ({
+  record,
+  showVariant,
+}: {
+  record: any;
+  showVariant?: "detailed";
+}) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [eligibility, setEligibility] = useState<{
+    eligible: boolean;
+    ticket: {
+      id: string;
+      title: string;
+      status: string;
+      createdAt: string;
+    } | null;
+  } | null>(null);
+  const dataProvider = useDataProvider();
+  const notify = useNotify();
+  const refresh = useRefresh();
+
+  // Don't show delete button for admin users
+  if (record.roles?.includes("admin")) {
+    return null;
+  }
+
+  const handleOpen = async () => {
+    setOpen(true);
+    setLoading(true);
+    try {
+      const { data } = await dataProvider.update("users", {
+        id: record.id,
+        data: { action: "checkDeleteEligibility" },
+        previousData: record,
+      });
+      setEligibility(data as any);
+    } catch (error: any) {
+      notify(`Error checking eligibility: ${error.message}`, { type: "error" });
+      setEligibility({ eligible: false, ticket: null });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!eligibility?.ticket) return;
+    try {
+      await dataProvider.update("users", {
+        id: record.id,
+        data: { action: "delete", ticketId: eligibility.ticket.id },
+        previousData: record,
+      });
+      notify("User deleted successfully", { type: "success" });
+      setOpen(false);
+      refresh();
+    } catch (error: any) {
+      notify(`Error: ${error.message}`, { type: "error" });
+    }
+  };
+
+  return (
+    <>
+      {showVariant === "detailed" ? (
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          startIcon={<DeleteForeverIcon />}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpen();
+          }}
+          sx={{
+            textTransform: "none",
+            borderColor: "#ffcdd2",
+            "&:hover": {
+              borderColor: "error.main",
+              bgcolor: "#ffebee",
+            },
+          }}
+        >
+          Delete Account
+        </Button>
+      ) : (
+        <RAButton
+          label="Delete"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpen();
+          }}
+          sx={{ color: "error.main" }}
+        >
+          <DeleteForeverIcon />
+        </RAButton>
+      )}
+
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <WarningIcon color="error" />
+          Delete User Account
+        </DialogTitle>
+        <DialogContent onClick={(e) => e.stopPropagation()}>
+          {loading ? (
+            <Typography variant="body2" color="textSecondary">
+              Checking delete eligibility...
+            </Typography>
+          ) : eligibility?.eligible && eligibility.ticket ? (
+            <>
+              <Typography variant="body2" paragraph>
+                Are you sure you want to <strong>permanently delete</strong> the
+                account of{" "}
+                <strong>
+                  {record.firstName} {record.lastName}
+                </strong>{" "}
+                ({record.email})?
+              </Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#fff3e0",
+                  borderRadius: 1,
+                  border: "1px solid #ffe0b2",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="subtitle2" gutterBottom>
+                  Linked Deletion Request Ticket
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Title:</strong> {eligibility.ticket.title}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Status:</strong> {eligibility.ticket.status}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Created:</strong>{" "}
+                  {new Date(eligibility.ticket.createdAt).toLocaleString()}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#ffebee",
+                  borderRadius: 1,
+                  border: "1px solid #ffcdd2",
+                }}
+              >
+                <Typography variant="body2" color="error" fontWeight={600}>
+                  This action is irreversible. All user data including profiles,
+                  job posts, applications, and support tickets will be
+                  permanently removed.
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="body1" color="textSecondary" paragraph>
+                This user cannot be deleted.
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                A user can only be deleted when they have a pending or
+                in-progress account deletion request ticket. No such ticket
+                exists for this user.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+          {eligibility?.eligible && (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              variant="contained"
+              color="error"
+              startIcon={<DeleteForeverIcon />}
+            >
+              Permanently Delete User
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+    </>
   );
 };
 
@@ -383,69 +594,72 @@ const ProfilesTabContent = ({ record }: { record: any }) => {
               )}
 
               {/* Company Sections - For Job Posters */}
-              {profile.companySections && profile.companySections.length > 0 && (
-                <Box sx={{ mt: 3 }}>
-                  <Box display="flex" alignItems="center" gap={1} mb={2}>
-                    <ArticleIcon color="primary" />
-                    <Typography variant="subtitle1" fontWeight={600}>
-                      Company Sections ({profile.companySections.length})
-                    </Typography>
-                  </Box>
-                  {profile.companySections.map(
-                    (section: any, sIndex: number) => (
-                      <Card key={sIndex} variant="outlined" sx={{ mb: 2 }}>
-                        <CardContent>
-                          <Box
-                            display="flex"
-                            justifyContent="space-between"
-                            alignItems="center"
-                            mb={1}
-                          >
-                            <Typography variant="subtitle2" fontWeight={600}>
-                              {section.title}
-                            </Typography>
-                            <Box display="flex" alignItems="center" gap={1}>
-                              <Chip
-                                label={
-                                  section.isExpanded ? "Expanded" : "Collapsed"
-                                }
-                                size="small"
-                                variant="outlined"
-                              />
-                              <Typography
-                                variant="caption"
-                                color="textSecondary"
-                              >
-                                Order: {section.order}
+              {profile.companySections &&
+                profile.companySections.length > 0 && (
+                  <Box sx={{ mt: 3 }}>
+                    <Box display="flex" alignItems="center" gap={1} mb={2}>
+                      <ArticleIcon color="primary" />
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Company Sections ({profile.companySections.length})
+                      </Typography>
+                    </Box>
+                    {profile.companySections.map(
+                      (section: any, sIndex: number) => (
+                        <Card key={sIndex} variant="outlined" sx={{ mb: 2 }}>
+                          <CardContent>
+                            <Box
+                              display="flex"
+                              justifyContent="space-between"
+                              alignItems="center"
+                              mb={1}
+                            >
+                              <Typography variant="subtitle2" fontWeight={600}>
+                                {section.title}
                               </Typography>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Chip
+                                  label={
+                                    section.isExpanded
+                                      ? "Expanded"
+                                      : "Collapsed"
+                                  }
+                                  size="small"
+                                  variant="outlined"
+                                />
+                                <Typography
+                                  variant="caption"
+                                  color="textSecondary"
+                                >
+                                  Order: {section.order}
+                                </Typography>
+                              </Box>
                             </Box>
-                          </Box>
-                          <Typography
-                            variant="body2"
-                            color="textSecondary"
-                            sx={{
-                              whiteSpace: "pre-wrap",
-                              maxHeight: 150,
-                              overflow: "auto",
-                            }}
-                          >
-                            {section.content}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="textSecondary"
-                            display="block"
-                            sx={{ mt: 1 }}
-                          >
-                            Created:{" "}
-                            {new Date(section.createdAt).toLocaleDateString()}
-                          </Typography>
-                        </CardContent>
-                      </Card>
-                    )
-                  )}
-                </Box>
-              )}
+                            <Typography
+                              variant="body2"
+                              color="textSecondary"
+                              sx={{
+                                whiteSpace: "pre-wrap",
+                                maxHeight: 150,
+                                overflow: "auto",
+                              }}
+                            >
+                              {section.content}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="textSecondary"
+                              display="block"
+                              sx={{ mt: 1 }}
+                            >
+                              Created:{" "}
+                              {new Date(section.createdAt).toLocaleDateString()}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      )
+                    )}
+                  </Box>
+                )}
             </CardContent>
           </Card>
         ))
@@ -692,6 +906,7 @@ export const UserList = () => (
             <ShowButton />
             <BlockUserButton record={record} />
             <UnblockUserButton record={record} />
+            <DeleteUserButton record={record} />
           </Box>
         )}
       />
@@ -707,40 +922,50 @@ export const UserShow = () => (
           label="User Information"
           render={(record: any) => (
             <Box>
-              <Box display="flex" alignItems="center" gap={2} mb={3}>
-                <Avatar
-                  src={record.profileImage}
-                  alt={`${record.firstName} ${record.lastName}`}
-                  sx={{ width: 80, height: 80 }}
-                >
-                  {record.firstName?.[0]}
-                  {record.lastName?.[0]}
-                </Avatar>
-                <Box>
-                  <Typography variant="h5">
-                    {record.firstName} {record.lastName}
-                  </Typography>
-                  <Typography variant="body1" color="textSecondary">
-                    {record.email}
-                  </Typography>
-                  <Box mt={1}>
-                    {record.roles?.map((role: string, index: number) => (
-                      <Chip
-                        key={index}
-                        label={role.replace("_", " ")}
-                        size="small"
-                        sx={{ mr: 0.5 }}
-                        color={
-                          role === "admin"
-                            ? "error"
-                            : role === "job_poster"
-                            ? "primary"
-                            : "default"
-                        }
-                      />
-                    ))}
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mb={3}
+              >
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Avatar
+                    src={record.profileImage}
+                    alt={`${record.firstName} ${record.lastName}`}
+                    sx={{ width: 80, height: 80 }}
+                  >
+                    {record.firstName?.[0]}
+                    {record.lastName?.[0]}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5">
+                      {record.firstName} {record.lastName}
+                    </Typography>
+                    <Typography variant="body1" color="textSecondary">
+                      {record.email}
+                    </Typography>
+                    <Box mt={1}>
+                      {record.roles?.map((role: string, index: number) => (
+                        <Chip
+                          key={index}
+                          label={role.replace("_", " ")}
+                          size="small"
+                          sx={{ mr: 0.5 }}
+                          color={
+                            role === "admin"
+                              ? "error"
+                              : role === "job_poster"
+                              ? "primary"
+                              : "default"
+                          }
+                        />
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
+                {!record.roles?.includes("admin") && (
+                  <DeleteUserButton record={record} showVariant="detailed" />
+                )}
               </Box>
 
               <Box

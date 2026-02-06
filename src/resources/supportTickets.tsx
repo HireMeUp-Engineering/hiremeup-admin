@@ -70,6 +70,7 @@ const ticketFilters = [
       { id: "account", name: "Account" },
       { id: "application_job", name: "Application/Job" },
       { id: "general", name: "General" },
+      { id: "account_deletion", name: "Account Deletion" },
     ]}
     alwaysOn
   />,

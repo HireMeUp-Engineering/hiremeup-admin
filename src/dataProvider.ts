@@ -404,6 +404,17 @@ export const dataProvider: DataProvider = {
           method: "PATCH",
         });
         return { data: { ...json.user, id: json.user.id } };
+      } else if (params.data.action === "delete") {
+        const url = `${API_URL}/admin/users/${params.id}`;
+        const { json } = await httpClient(url, {
+          method: "DELETE",
+          body: JSON.stringify({ ticketId: params.data.ticketId }),
+        });
+        return { data: { id: params.id, ...json } };
+      } else if (params.data.action === "checkDeleteEligibility") {
+        const url = `${API_URL}/admin/users/${params.id}/delete-eligibility`;
+        const { json } = await httpClient(url);
+        return { data: { id: params.id, ...json } };
       }
     }
 
