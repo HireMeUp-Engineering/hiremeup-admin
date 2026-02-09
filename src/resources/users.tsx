@@ -437,6 +437,14 @@ const VideoPlayerDialog = ({
             src={video.videoUrl}
             controls
             autoPlay
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.style.display = "none";
+              const errorDiv = document.createElement("div");
+              errorDiv.style.cssText = "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;";
+              errorDiv.textContent = "Failed to load video";
+              target.parentElement?.appendChild(errorDiv);
+            }}
             style={{
               position: "absolute",
               top: 0,
@@ -741,6 +749,7 @@ const userExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (

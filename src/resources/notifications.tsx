@@ -133,18 +133,35 @@ const EditTemplateDialog: React.FC<EditTemplateDialogProps> = ({
     }
   }, [template]);
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      titleTemplate: "",
+      bodyTemplate: "",
+      emailSubjectTemplate: "",
+      emailBodyTemplate: "",
+      isActive: true,
+      description: "",
+    });
+  };
+
+  const handleClose = () => {
+    resetForm();
+    onClose();
+  };
+
   const handleSave = async () => {
     setSaving(true);
     try {
       await onSave(formData);
-      onClose();
+      handleClose();
     } finally {
       setSaving(false);
     }
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
+    <Dialog open={open} onClose={handleClose} maxWidth="md" fullWidth>
       <DialogTitle>
         Edit Template: {template?.name}
         <Typography variant="caption" display="block" color="textSecondary">
@@ -243,7 +260,7 @@ const EditTemplateDialog: React.FC<EditTemplateDialogProps> = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} label="Cancel" />
+        <Button onClick={handleClose} label="Cancel" />
         <Button
           onClick={handleSave}
           disabled={saving}
@@ -268,6 +285,7 @@ const PreviewDialog: React.FC<PreviewDialogProps> = ({
   template,
 }) => {
   const dataProvider = useDataProvider();
+  const notify = useNotify();
   const [sampleData, setSampleData] = useState<Record<string, string>>({});
   const [preview, setPreview] = useState<{
     title: string;
@@ -277,6 +295,7 @@ const PreviewDialog: React.FC<PreviewDialogProps> = ({
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
+    setPreview(null);
     if (template?.variables) {
       const defaultData: Record<string, string> = {};
       template.variables.forEach((v) => {
@@ -305,8 +324,9 @@ const PreviewDialog: React.FC<PreviewDialogProps> = ({
         }
       );
       setPreview(response.data as any);
-    } catch (error) {
-      console.error("Preview error:", error);
+    } catch (error: any) {
+      notify(`Failed to generate preview: ${error?.message || "Unknown error"}`, { type: "error" });
+      setPreview(null);
     } finally {
       setLoading(false);
     }
@@ -411,6 +431,11 @@ const SendNotificationDialog: React.FC<SendNotificationDialogProps> = ({
 
     if (formData.target === "specific" && !formData.userIds.trim()) {
       notify("Please enter user IDs", { type: "warning" });
+      return;
+    }
+
+    if (!formData.sendEmail && !formData.sendPush) {
+      notify("At least one delivery channel (Email or Push) must be enabled", { type: "warning" });
       return;
     }
 
@@ -897,32 +922,27 @@ const NotificationsMain = () => {
 
   return (
     <Box>
-      <Box
-        sx={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          mb: 2,
-        }}
-      >
-        <Typography variant="h5">
-          <NotificationsIcon sx={{ mr: 1, verticalAlign: "middle" }} />
-          Notification Management
-        </Typography>
-        <Button
-          onClick={() => setSendDialogOpen(true)}
-          label="Send Notification"
-        >
-          <SendIcon />
-        </Button>
-      </Box>
-
       <Card>
-        <Box sx={{ borderBottom: 1, borderColor: "divider" }}>
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            borderBottom: 1,
+            borderColor: "divider",
+            px: 1,
+          }}
+        >
           <Tabs value={tabValue} onChange={handleTabChange}>
             <Tab label="Templates" />
             <Tab label="Sent Notifications" />
           </Tabs>
+          <Button
+            onClick={() => setSendDialogOpen(true)}
+            label="Send Notification"
+          >
+            <SendIcon />
+          </Button>
         </Box>
 
         <TabPanel value={tabValue} index={0}>

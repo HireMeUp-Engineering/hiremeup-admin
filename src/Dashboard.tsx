@@ -9,6 +9,7 @@ import {
   Button,
   Paper,
   Divider,
+  Alert,
 } from "@mui/material";
 import {
   Work as WorkIcon,
@@ -124,6 +125,7 @@ const exportReport = (data: any[], filename: string) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 export const Dashboard = () => {
@@ -139,14 +141,18 @@ export const Dashboard = () => {
     totalInterviews: 0,
   });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [applicationsByStatus, setApplicationsByStatus] = useState<any[]>([]);
   const [jobPostTrend, setJobPostTrend] = useState<any[]>([]);
   const [userGrowth, setUserGrowth] = useState<any[]>([]);
   const [conversionData, setConversionData] = useState<any[]>([]);
 
   useEffect(() => {
+    let cancelled = false;
+
     const fetchStats = async () => {
       try {
+        setError(null);
         // Fetch ALL data without pagination limits for accurate stats
         const jobPostsResult = await dataProvider.getList("jobPosts", {
           pagination: { page: 1, perPage: 5000 },
@@ -189,6 +195,8 @@ export const Dashboard = () => {
         const blockedUsersCount = usersResult.data.filter(
           (user: any) => user.isActive === false
         ).length;
+
+        if (cancelled) return;
 
         setStats({
           totalJobPosts: jobPostsResult.total || 0,
@@ -311,20 +319,40 @@ export const Dashboard = () => {
           { stage: "Hired", count: hiredCount },
         ];
         setConversionData(conversion);
-      } catch (error) {
-        console.error("Error fetching dashboard stats:", error);
+      } catch (error: any) {
+        if (!cancelled) {
+          setError(error?.message || "Failed to load dashboard statistics");
+        }
       } finally {
-        setLoading(false);
+        if (!cancelled) {
+          setLoading(false);
+        }
       }
     };
 
     fetchStats();
+    return () => {
+      cancelled = true;
+    };
   }, [dataProvider]);
 
   if (loading) {
     return (
       <Box p={3}>
         <Typography>Loading dashboard...</Typography>
+      </Box>
+    );
+  }
+
+  if (error) {
+    return (
+      <Box p={3}>
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+        <Button variant="contained" onClick={() => window.location.reload()}>
+          Retry
+        </Button>
       </Box>
     );
   }

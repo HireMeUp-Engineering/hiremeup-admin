@@ -154,6 +154,7 @@ const interviewAuditExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (
@@ -460,6 +461,7 @@ export const InterviewAuditShow = () => (
                     <video
                       src={record.recordingUrl}
                       controls
+                      onError={(e) => { e.currentTarget.style.display = "none"; }}
                       style={{ width: "100%", maxWidth: 800, borderRadius: 8 }}
                     />
                   </Box>

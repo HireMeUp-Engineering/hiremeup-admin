@@ -155,6 +155,7 @@ const feedbackExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 // List Actions
@@ -299,8 +300,7 @@ export const FeedbackShow = () => {
   // Automatically mark as reviewed when admin views it
   React.useEffect(() => {
     if (record && !record.reviewedAt) {
-      // The backend automatically marks it as reviewed, just log it
-      console.log("Feedback viewed by admin:", record.id);
+      // The backend automatically marks it as reviewed
     }
   }, [record]);
 

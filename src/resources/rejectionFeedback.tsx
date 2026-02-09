@@ -93,6 +93,7 @@ const rejectionFeedbackExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (
@@ -303,6 +304,7 @@ export const RejectionFeedbackShow = () => (
                         src={record.responseVideoUrl}
                         controls
                         poster={record.responseThumbnailUrl}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                         style={{
                           width: "100%",
                           maxWidth: 800,

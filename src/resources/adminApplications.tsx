@@ -303,6 +303,7 @@ const applicationExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (
@@ -422,7 +423,6 @@ export const AdminApplicationList = () => (
         render={(record: any) => (
           <Box display="flex" gap={1}>
             <ShowButton />
-            {/* <UpdateNotesButton record={record} /> */}
             <UpdateRatingButton record={record} />
             <UpdateStatusButton record={record} />
           </Box>
@@ -541,6 +541,7 @@ export const AdminApplicationShow = () => (
                         src={record.mainVideoUrl}
                         controls
                         poster={record.thumbnailUrl}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                         style={{
                           width: "100%",
                           maxWidth: 800,
@@ -580,6 +581,7 @@ export const AdminApplicationShow = () => (
                           <video
                             src={answer.answerUrl}
                             controls
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
                             style={{ width: "100%", maxWidth: 600 }}
                           />
                         </Box>

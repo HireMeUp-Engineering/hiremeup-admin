@@ -1,7 +1,11 @@
 import { DataProvider, fetchUtils } from "react-admin";
 import simpleRestProvider from "ra-data-simple-rest";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3001";
+const API_URL = process.env.REACT_APP_API_URL;
+
+if (!API_URL) {
+  throw new Error("REACT_APP_API_URL environment variable is required");
+}
 
 const httpClient = (url: string, options: fetchUtils.Options = {}) => {
   if (!options.headers) {
