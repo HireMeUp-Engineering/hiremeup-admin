@@ -6,12 +6,10 @@ import {
   DateField,
   useDataProvider,
   useNotify,
-  useRefresh,
   TextInput,
   SelectInput,
   FunctionField,
   TopToolbar,
-  FilterButton,
   ExportButton,
   Button,
 } from "react-admin";
@@ -45,7 +43,6 @@ import {
 import {
   Edit as EditIcon,
   Send as SendIcon,
-  Refresh as RefreshIcon,
   Preview as PreviewIcon,
   Restore as RestoreIcon,
   Notifications as NotificationsIcon,
@@ -325,7 +322,10 @@ const PreviewDialog: React.FC<PreviewDialogProps> = ({
       );
       setPreview(response.data as any);
     } catch (error: any) {
-      notify(`Failed to generate preview: ${error?.message || "Unknown error"}`, { type: "error" });
+      notify(
+        `Failed to generate preview: ${error?.message || "Unknown error"}`,
+        { type: "error" }
+      );
       setPreview(null);
     } finally {
       setLoading(false);
@@ -435,7 +435,9 @@ const SendNotificationDialog: React.FC<SendNotificationDialogProps> = ({
     }
 
     if (!formData.sendEmail && !formData.sendPush) {
-      notify("At least one delivery channel (Email or Push) must be enabled", { type: "warning" });
+      notify("At least one delivery channel (Email or Push) must be enabled", {
+        type: "warning",
+      });
       return;
     }
 
@@ -610,11 +612,7 @@ const SendNotificationDialog: React.FC<SendNotificationDialogProps> = ({
 
 // ==================== Templates List ====================
 
-interface TemplatesListProps {
-  onRefresh: () => void;
-}
-
-const TemplatesList: React.FC<TemplatesListProps> = ({ onRefresh }) => {
+const TemplatesList = () => {
   const dataProvider = useDataProvider();
   const notify = useNotify();
   const [templates, setTemplates] = useState<NotificationTemplate[]>([]);
@@ -691,13 +689,6 @@ const TemplatesList: React.FC<TemplatesListProps> = ({ onRefresh }) => {
 
   return (
     <Box>
-      <Box sx={{ mb: 2, display: "flex", justifyContent: "flex-end" }}>
-        <Tooltip title="Refresh">
-          <IconButton onClick={fetchTemplates}>
-            <RefreshIcon />
-          </IconButton>
-        </Tooltip>
-      </Box>
       <Grid container spacing={2}>
         {templates.map((template) => (
           <Grid size={{ xs: 12, md: 6 }} key={template.id}>
@@ -848,6 +839,7 @@ const sentNotificationFilters = [
       { id: "true", name: "Read" },
       { id: "false", name: "Unread" },
     ]}
+    alwaysOn
   />,
 ];
 
@@ -860,7 +852,6 @@ const SentNotificationsList = () => {
       perPage={25}
       actions={
         <TopToolbar>
-          <FilterButton />
           <ExportButton />
         </TopToolbar>
       }
@@ -914,7 +905,6 @@ const SentNotificationsList = () => {
 const NotificationsMain = () => {
   const [tabValue, setTabValue] = useState(0);
   const [sendDialogOpen, setSendDialogOpen] = useState(false);
-  const refresh = useRefresh();
 
   const handleTabChange = (_: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);
@@ -946,7 +936,7 @@ const NotificationsMain = () => {
         </Box>
 
         <TabPanel value={tabValue} index={0}>
-          <TemplatesList onRefresh={refresh} />
+          <TemplatesList />
         </TabPanel>
 
         <TabPanel value={tabValue} index={1}>
