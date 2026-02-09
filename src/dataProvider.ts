@@ -280,6 +280,12 @@ export const dataProvider: DataProvider = {
   },
 
   getOne: async (resource, params) => {
+    if (resource === "adminDashboard") {
+      const url = `${API_URL}/dashboard/admin/stats`;
+      const { json } = await httpClient(url);
+      return { data: { ...json, id: "stats" } };
+    }
+
     if (resource === "jobPosts") {
       const url = `${API_URL}/admin/job-posts/${params.id}`;
       const { json } = await httpClient(url);

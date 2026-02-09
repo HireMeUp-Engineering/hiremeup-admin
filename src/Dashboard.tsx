@@ -49,6 +49,11 @@ interface DashboardStats {
   activeUsers: number;
   blockedUsers: number;
   totalInterviews: number;
+  totalViews: number;
+  applicationsByStatus: { name: string; value: number }[];
+  jobPostTrend: { month: string; jobPosts: number; applications: number }[];
+  userGrowth: { month: string; totalUsers: number; newUsers: number }[];
+  conversionFunnel: { stage: string; count: number }[];
 }
 
 const StatCard = ({ title, value, icon, color, onClick }: any) => (
@@ -131,21 +136,9 @@ const exportReport = (data: any[], filename: string) => {
 export const Dashboard = () => {
   const dataProvider = useDataProvider();
   const navigate = useNavigate();
-  const [stats, setStats] = useState<DashboardStats>({
-    totalJobPosts: 0,
-    publishedJobs: 0,
-    totalApplicants: 0,
-    totalUsers: 0,
-    activeUsers: 0,
-    blockedUsers: 0,
-    totalInterviews: 0,
-  });
+  const [stats, setStats] = useState<DashboardStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [applicationsByStatus, setApplicationsByStatus] = useState<any[]>([]);
-  const [jobPostTrend, setJobPostTrend] = useState<any[]>([]);
-  const [userGrowth, setUserGrowth] = useState<any[]>([]);
-  const [conversionData, setConversionData] = useState<any[]>([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -153,172 +146,13 @@ export const Dashboard = () => {
     const fetchStats = async () => {
       try {
         setError(null);
-        // Fetch ALL data without pagination limits for accurate stats
-        const jobPostsResult = await dataProvider.getList("jobPosts", {
-          pagination: { page: 1, perPage: 5000 },
-          sort: { field: "createdAt", order: "DESC" },
-          filter: {},
+        const { data } = await dataProvider.getOne("adminDashboard", {
+          id: "stats",
         });
-
-        // Fetch ALL applications for accurate status breakdown
-        const applicantsResult = await dataProvider.getList(
-          "adminApplications",
-          {
-            pagination: { page: 1, perPage: 5000 },
-            sort: { field: "appliedAt", order: "DESC" },
-            filter: {},
-          }
-        );
-
-        // Fetch ALL users for accurate stats
-        const usersResult = await dataProvider.getList("users", {
-          pagination: { page: 1, perPage: 5000 },
-          sort: { field: "createdAt", order: "DESC" },
-          filter: {},
-        });
-
-        // Fetch ALL interviews for accurate stats
-        const interviewsResult = await dataProvider.getList("interviewAudit", {
-          pagination: { page: 1, perPage: 5000 },
-          sort: { field: "scheduledAt", order: "DESC" },
-          filter: {},
-        });
-
-        const publishedCount = jobPostsResult.data.filter(
-          (job: any) => job.status === "published"
-        ).length;
-
-        const activeUsersCount = usersResult.data.filter(
-          (user: any) => user.isActive === true
-        ).length;
-
-        const blockedUsersCount = usersResult.data.filter(
-          (user: any) => user.isActive === false
-        ).length;
 
         if (cancelled) return;
 
-        setStats({
-          totalJobPosts: jobPostsResult.total || 0,
-          publishedJobs: publishedCount,
-          totalApplicants: applicantsResult.total || 0,
-          totalUsers: usersResult.total || 0,
-          activeUsers: activeUsersCount,
-          blockedUsers: blockedUsersCount,
-          totalInterviews: interviewsResult.total || 0,
-        });
-
-        // Process ALL applications by status for pie chart (not just first page)
-        const statusCounts: any = {};
-        // Count all applications from the fetched data
-        applicantsResult.data.forEach((app: any) => {
-          const status = app.status || "pending";
-          statusCounts[status] = (statusCounts[status] || 0) + 1;
-        });
-
-        // Format status names for display
-        const statusData = Object.keys(statusCounts).map((status) => ({
-          name:
-            status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, " "),
-          value: statusCounts[status],
-        }));
-        setApplicationsByStatus(statusData);
-
-        // Real trend data based on actual records grouped by month
-        // Get last 6 months
-        const now = new Date();
-        const last6Months = [];
-        for (let i = 5; i >= 0; i--) {
-          const date = new Date(now.getFullYear(), now.getMonth() - i, 1);
-          last6Months.push({
-            month: date.toLocaleString("default", { month: "short" }),
-            year: date.getFullYear(),
-            date: date,
-          });
-        }
-
-        // Count job posts and applications by month
-        const trendData = last6Months.map((monthInfo) => {
-          const nextMonth = new Date(monthInfo.date);
-          nextMonth.setMonth(nextMonth.getMonth() + 1);
-
-          const jobPostsInMonth = jobPostsResult.data.filter((job: any) => {
-            const createdDate = new Date(job.createdAt);
-            return createdDate >= monthInfo.date && createdDate < nextMonth;
-          }).length;
-
-          const applicationsInMonth = applicantsResult.data.filter(
-            (app: any) => {
-              const appliedDate = new Date(app.appliedAt);
-              return appliedDate >= monthInfo.date && appliedDate < nextMonth;
-            }
-          ).length;
-
-          return {
-            month: monthInfo.month,
-            jobPosts: jobPostsInMonth,
-            applications: applicationsInMonth,
-          };
-        });
-        setJobPostTrend(trendData);
-
-        // User Growth - Total users (cumulative) vs New registrations per month
-        const userGrowthData = last6Months.map((monthInfo, index) => {
-          const nextMonth = new Date(monthInfo.date);
-          nextMonth.setMonth(nextMonth.getMonth() + 1);
-
-          // Count NEW users registered in THIS specific month
-          const newUsersInMonth = usersResult.data.filter((user: any) => {
-            const createdDate = new Date(user.createdAt);
-            return createdDate >= monthInfo.date && createdDate < nextMonth;
-          }).length;
-
-          // Count TOTAL users registered up to the END of this month (cumulative)
-          const totalUsersUpToMonth = usersResult.data.filter((user: any) => {
-            const createdDate = new Date(user.createdAt);
-            return createdDate < nextMonth;
-          }).length;
-
-          return {
-            month: monthInfo.month,
-            totalUsers: totalUsersUpToMonth,
-            newUsers: newUsersInMonth,
-          };
-        });
-        setUserGrowth(userGrowthData);
-
-        // Conversion funnel - use real counts from application statuses
-        const totalViews = jobPostsResult.data.reduce(
-          (sum: number, job: any) => sum + (job.viewCount || 0),
-          0
-        );
-        const totalApps = applicantsResult.total || 0;
-        const reviewedCount = applicantsResult.data.filter(
-          (app: any) =>
-            app.status === "reviewed" ||
-            app.status === "shortlisted" ||
-            app.status === "hired"
-        ).length;
-        const shortlistedCount = applicantsResult.data.filter(
-          (app: any) => app.status === "shortlisted" || app.status === "hired"
-        ).length;
-        const totalInt = interviewsResult.total || 0;
-        const hiredCount = applicantsResult.data.filter(
-          (app: any) => app.status === "hired"
-        ).length;
-
-        const conversion = [
-          {
-            stage: "Job Views",
-            count: totalViews > 0 ? totalViews : totalApps * 2,
-          },
-          { stage: "Applications", count: totalApps },
-          { stage: "Reviewed", count: reviewedCount },
-          { stage: "Shortlisted", count: shortlistedCount },
-          { stage: "Interviews", count: totalInt },
-          { stage: "Hired", count: hiredCount },
-        ];
-        setConversionData(conversion);
+        setStats(data as DashboardStats);
       } catch (error: any) {
         if (!cancelled) {
           setError(error?.message || "Failed to load dashboard statistics");
@@ -344,11 +178,11 @@ export const Dashboard = () => {
     );
   }
 
-  if (error) {
+  if (error || !stats) {
     return (
       <Box p={3}>
         <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
+          {error || "Failed to load dashboard statistics"}
         </Alert>
         <Button variant="contained" onClick={() => window.location.reload()}>
           Retry
@@ -373,7 +207,13 @@ export const Dashboard = () => {
           variant="contained"
           startIcon={<DownloadIcon />}
           onClick={() => exportReport([{
-            ...stats,
+            totalJobPosts: stats.totalJobPosts,
+            publishedJobs: stats.publishedJobs,
+            totalApplicants: stats.totalApplicants,
+            totalUsers: stats.totalUsers,
+            activeUsers: stats.activeUsers,
+            blockedUsers: stats.blockedUsers,
+            totalInterviews: stats.totalInterviews,
             conversionRate: stats.totalInterviews > 0
               ? `${Math.round((stats.totalInterviews / stats.totalApplicants) * 100)}%`
               : "0%"
@@ -493,7 +333,7 @@ export const Dashboard = () => {
                 size="small"
                 variant="outlined"
                 startIcon={<DownloadIcon />}
-                onClick={() => exportReport(jobPostTrend, "job-trend")}
+                onClick={() => exportReport(stats.jobPostTrend, "job-trend")}
                 sx={{
                   color: "#ffffff",
                   borderColor: "#ffffff",
@@ -509,7 +349,7 @@ export const Dashboard = () => {
           />
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <AreaChart data={jobPostTrend}>
+              <AreaChart data={stats.jobPostTrend}>
                 <defs>
                   <linearGradient id="colorJobs" x1="0" y1="0" x2="0" y2="1">
                     <stop offset="5%" stopColor="#211B43" stopOpacity={0.8} />
@@ -564,7 +404,7 @@ export const Dashboard = () => {
                 variant="outlined"
                 startIcon={<DownloadIcon />}
                 onClick={() =>
-                  exportReport(applicationsByStatus, "applications-status")
+                  exportReport(stats.applicationsByStatus, "applications-status")
                 }
                 sx={{
                   color: "#ffffff",
@@ -583,7 +423,7 @@ export const Dashboard = () => {
             <ResponsiveContainer width="100%" height={300}>
               <PieChart>
                 <Pie
-                  data={applicationsByStatus}
+                  data={stats.applicationsByStatus}
                   cx="50%"
                   cy="50%"
                   labelLine={false}
@@ -594,7 +434,7 @@ export const Dashboard = () => {
                   fill="#8884d8"
                   dataKey="value"
                 >
-                  {applicationsByStatus.map((entry, index) => (
+                  {stats.applicationsByStatus.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
@@ -634,7 +474,7 @@ export const Dashboard = () => {
                 size="small"
                 variant="outlined"
                 startIcon={<DownloadIcon />}
-                onClick={() => exportReport(userGrowth, "user-growth")}
+                onClick={() => exportReport(stats.userGrowth, "user-growth")}
                 sx={{
                   color: "#ffffff",
                   borderColor: "#ffffff",
@@ -650,7 +490,7 @@ export const Dashboard = () => {
           />
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <LineChart data={userGrowth}>
+              <LineChart data={stats.userGrowth}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="month" />
                 <YAxis />
@@ -696,7 +536,7 @@ export const Dashboard = () => {
                 variant="outlined"
                 startIcon={<DownloadIcon />}
                 onClick={() =>
-                  exportReport(conversionData, "conversion-funnel")
+                  exportReport(stats.conversionFunnel, "conversion-funnel")
                 }
                 sx={{
                   color: "#ffffff",
@@ -713,13 +553,13 @@ export const Dashboard = () => {
           />
           <CardContent>
             <ResponsiveContainer width="100%" height={300}>
-              <BarChart data={conversionData} layout="vertical">
+              <BarChart data={stats.conversionFunnel} layout="vertical">
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis type="number" />
                 <YAxis dataKey="stage" type="category" width={100} />
                 <Tooltip />
                 <Bar dataKey="count" fill="#4caf50" name="Count">
-                  {conversionData.map((entry, index) => (
+                  {stats.conversionFunnel.map((entry, index) => (
                     <Cell
                       key={`cell-${index}`}
                       fill={COLORS[index % COLORS.length]}
