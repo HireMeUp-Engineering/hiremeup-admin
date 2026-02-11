@@ -1,7 +1,11 @@
 import { DataProvider, fetchUtils } from "react-admin";
 import simpleRestProvider from "ra-data-simple-rest";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3001";
+const API_URL = process.env.REACT_APP_API_URL;
+
+if (!API_URL) {
+  throw new Error("REACT_APP_API_URL environment variable is required");
+}
 
 const httpClient = (url: string, options: fetchUtils.Options = {}) => {
   if (!options.headers) {
@@ -276,6 +280,12 @@ export const dataProvider: DataProvider = {
   },
 
   getOne: async (resource, params) => {
+    if (resource === "adminDashboard") {
+      const url = `${API_URL}/dashboard/admin/stats`;
+      const { json } = await httpClient(url);
+      return { data: { ...json, id: "stats" } };
+    }
+
     if (resource === "jobPosts") {
       const url = `${API_URL}/admin/job-posts/${params.id}`;
       const { json } = await httpClient(url);

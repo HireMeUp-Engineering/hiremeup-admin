@@ -351,6 +351,7 @@ const supportTicketExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 // List Actions

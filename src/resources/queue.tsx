@@ -43,6 +43,18 @@ import { EnhancedChip } from "../components/shared/EnhancedChip";
 import { formatRelativeTime } from "../utils/dateFormatters";
 import { Avatar } from "@mui/material";
 
+function getAuthToken(): string | null {
+  try {
+    const auth = localStorage.getItem("auth");
+    if (!auth) return null;
+    const parsed = JSON.parse(auth);
+    return parsed?.token || null;
+  } catch {
+    localStorage.removeItem("auth");
+    return null;
+  }
+}
+
 const SendQuestionButton = ({ record }: any) => {
   const [open, setOpen] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
@@ -55,13 +67,10 @@ const SendQuestionButton = ({ record }: any) => {
   const handleOpen = async () => {
     setLoading(true);
     try {
-      // Fetch questions using the next-step API
-      const auth = localStorage.getItem("auth");
-      if (!auth) return;
-
-      const { token } = JSON.parse(auth);
+      const token = getAuthToken();
+      if (!token) return;
       const response = await fetch(
-        `${process.env.REACT_APP_API_URL || "http://localhost:3001"}/queue/${
+        `${process.env.REACT_APP_API_URL}/queue/${
           record.id
         }/next-step`,
         {
@@ -88,13 +97,11 @@ const SendQuestionButton = ({ record }: any) => {
     }
 
     try {
-      const auth = localStorage.getItem("auth");
-      if (!auth) return;
-
-      const { token } = JSON.parse(auth);
+      const token = getAuthToken();
+      if (!token) return;
       const response = await fetch(
         `${
-          process.env.REACT_APP_API_URL || "http://localhost:3001"
+          process.env.REACT_APP_API_URL
         }/queue/send-question`,
         {
           method: "POST",

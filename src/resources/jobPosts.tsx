@@ -1,4 +1,5 @@
 import React from "react";
+import DOMPurify from "dompurify";
 import {
   List,
   Datagrid,
@@ -93,6 +94,7 @@ const jobPostExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (
@@ -373,7 +375,7 @@ export const JobPostShow = () => (
               <Box sx={{ p: 2 }}>
                 {record.jobDescription ? (
                   <div
-                    dangerouslySetInnerHTML={{ __html: record.jobDescription }}
+                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(record.jobDescription) }}
                   />
                 ) : (
                   <p style={{ color: "#666" }}>No job description provided</p>
@@ -395,7 +397,7 @@ export const JobPostShow = () => (
                 <Box sx={{ p: 2 }}>
                   <div
                     dangerouslySetInnerHTML={{
-                      __html: record.projectDescription,
+                      __html: DOMPurify.sanitize(record.projectDescription),
                     }}
                   />
                 </Box>
@@ -419,12 +421,13 @@ export const JobPostShow = () => (
                       <video
                         src={record.mainVideoUrl}
                         controls
+                        poster={record.mainThumbnailUrl}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                         style={{
                           width: "100%",
                           maxWidth: 800,
                           borderRadius: 8,
                         }}
-                        poster={record.mainThumbnailUrl}
                       />
                     </Box>
                   )}
