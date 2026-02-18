@@ -249,7 +249,8 @@ export const dataProvider: DataProvider = {
     // Sent Notifications
     if (resource === "sentNotifications") {
       const { page, perPage } = params.pagination || { page: 1, perPage: 25 };
-      const { field, order } = params.sort || {
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      const { field: _field, order: _order } = params.sort || {
         field: "createdAt",
         order: "DESC",
       };

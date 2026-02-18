@@ -12,7 +12,6 @@ import {
   SimpleShowLayout,
   FunctionField,
   ChipField,
-  useDataProvider,
   useNotify,
   useRefresh,
   Button as RAButton,
@@ -60,7 +59,6 @@ const SendQuestionButton = ({ record }: any) => {
   const [questions, setQuestions] = useState<any[]>([]);
   const [selectedQuestion, setSelectedQuestion] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const dataProvider = useDataProvider();
   const notify = useNotify();
   const refresh = useRefresh();
 
