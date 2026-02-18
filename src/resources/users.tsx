@@ -12,9 +12,7 @@ import {
   Button as RAButton,
   TextInput,
   SelectInput,
-  BooleanInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -42,11 +40,18 @@ import {
   People as PeopleIcon,
   Block as BlockIcon,
   CheckCircle as UnblockIcon,
+  DeleteForever as DeleteForeverIcon,
   Work as WorkIcon,
   Assignment as AssignmentIcon,
   CalendarToday,
   Email as EmailIcon,
+  VideoLibrary as VideoIcon,
+  Article as ArticleIcon,
+  PlayCircleOutline as PlayIcon,
+  Close as CloseIcon,
+  Warning as WarningIcon,
 } from "@mui/icons-material";
+import IconButton from "@mui/material/IconButton";
 import { EnhancedChip } from "../components/shared/EnhancedChip";
 import { formatRelativeTime } from "../utils/dateFormatters";
 
@@ -172,6 +177,514 @@ const UnblockUserButton = ({ record }: any) => {
   );
 };
 
+const DeleteUserButton = ({
+  record,
+  showVariant,
+}: {
+  record: any;
+  showVariant?: "detailed";
+}) => {
+  const [open, setOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [eligibility, setEligibility] = useState<{
+    eligible: boolean;
+    ticket: {
+      id: string;
+      title: string;
+      status: string;
+      createdAt: string;
+    } | null;
+  } | null>(null);
+  const dataProvider = useDataProvider();
+  const notify = useNotify();
+  const refresh = useRefresh();
+
+  // Don't show delete button for admin users
+  if (record.roles?.includes("admin")) {
+    return null;
+  }
+
+  const handleOpen = async () => {
+    setOpen(true);
+    setLoading(true);
+    try {
+      const { data } = await dataProvider.update("users", {
+        id: record.id,
+        data: { action: "checkDeleteEligibility" },
+        previousData: record,
+      });
+      setEligibility(data as any);
+    } catch (error: any) {
+      notify(`Error checking eligibility: ${error.message}`, { type: "error" });
+      setEligibility({ eligible: false, ticket: null });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!eligibility?.ticket) return;
+    try {
+      await dataProvider.update("users", {
+        id: record.id,
+        data: { action: "delete", ticketId: eligibility.ticket.id },
+        previousData: record,
+      });
+      notify("User deleted successfully", { type: "success" });
+      setOpen(false);
+      refresh();
+    } catch (error: any) {
+      notify(`Error: ${error.message}`, { type: "error" });
+    }
+  };
+
+  return (
+    <>
+      {showVariant === "detailed" ? (
+        <Button
+          variant="outlined"
+          color="error"
+          size="small"
+          startIcon={<DeleteForeverIcon />}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpen();
+          }}
+          sx={{
+            textTransform: "none",
+            borderColor: "#ffcdd2",
+            "&:hover": {
+              borderColor: "error.main",
+              bgcolor: "#ffebee",
+            },
+          }}
+        >
+          Delete Account
+        </Button>
+      ) : (
+        <RAButton
+          label="Delete"
+          onClick={(e) => {
+            e.stopPropagation();
+            handleOpen();
+          }}
+          sx={{ color: "error.main" }}
+        >
+          <DeleteForeverIcon />
+        </RAButton>
+      )}
+
+      <Dialog
+        open={open}
+        onClose={() => setOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        onClick={(e) => e.stopPropagation()}
+      >
+        <DialogTitle sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+          <WarningIcon color="error" />
+          Delete User Account
+        </DialogTitle>
+        <DialogContent onClick={(e) => e.stopPropagation()}>
+          {loading ? (
+            <Typography variant="body2" color="textSecondary">
+              Checking delete eligibility...
+            </Typography>
+          ) : eligibility?.eligible && eligibility.ticket ? (
+            <>
+              <Typography variant="body2" paragraph>
+                Are you sure you want to <strong>permanently delete</strong> the
+                account of{" "}
+                <strong>
+                  {record.firstName} {record.lastName}
+                </strong>{" "}
+                ({record.email})?
+              </Typography>
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#fff3e0",
+                  borderRadius: 1,
+                  border: "1px solid #ffe0b2",
+                  mb: 2,
+                }}
+              >
+                <Typography variant="subtitle2" gutterBottom>
+                  Linked Deletion Request Ticket
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Title:</strong> {eligibility.ticket.title}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Status:</strong> {eligibility.ticket.status}
+                </Typography>
+                <Typography variant="body2">
+                  <strong>Created:</strong>{" "}
+                  {new Date(eligibility.ticket.createdAt).toLocaleString()}
+                </Typography>
+              </Box>
+              <Box
+                sx={{
+                  p: 2,
+                  bgcolor: "#ffebee",
+                  borderRadius: 1,
+                  border: "1px solid #ffcdd2",
+                }}
+              >
+                <Typography variant="body2" color="error" fontWeight={600}>
+                  This action is irreversible. All user data including profiles,
+                  job posts, applications, and support tickets will be
+                  permanently removed.
+                </Typography>
+              </Box>
+            </>
+          ) : (
+            <Box
+              sx={{
+                p: 2,
+                bgcolor: "#f5f5f5",
+                borderRadius: 1,
+                textAlign: "center",
+              }}
+            >
+              <Typography variant="body1" color="textSecondary" paragraph>
+                This user cannot be deleted.
+              </Typography>
+              <Typography variant="body2" color="textSecondary">
+                A user can only be deleted when they have a pending or
+                in-progress account deletion request ticket. No such ticket
+                exists for this user.
+              </Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button
+            onClick={(e) => {
+              e.preventDefault();
+              setOpen(false);
+            }}
+          >
+            Cancel
+          </Button>
+          {eligibility?.eligible && (
+            <Button
+              onClick={(e) => {
+                e.preventDefault();
+                handleDelete();
+              }}
+              variant="contained"
+              color="error"
+              startIcon={<DeleteForeverIcon />}
+            >
+              Permanently Delete User
+            </Button>
+          )}
+        </DialogActions>
+      </Dialog>
+    </>
+  );
+};
+
+// Video Player Dialog Component
+const VideoPlayerDialog = ({
+  open,
+  onClose,
+  video,
+}: {
+  open: boolean;
+  onClose: () => void;
+  video: any;
+}) => {
+  if (!video) return null;
+
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="md"
+      fullWidth
+      PaperProps={{
+        sx: { bgcolor: "#000" },
+      }}
+    >
+      <DialogTitle
+        sx={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          color: "#fff",
+          bgcolor: "#000",
+          py: 1,
+        }}
+      >
+        <Typography variant="h6" noWrap sx={{ flex: 1 }}>
+          {video.title}
+        </Typography>
+        <IconButton onClick={onClose} sx={{ color: "#fff" }}>
+          <CloseIcon />
+        </IconButton>
+      </DialogTitle>
+      <DialogContent sx={{ p: 0, bgcolor: "#000" }}>
+        <Box
+          sx={{
+            position: "relative",
+            width: "100%",
+            paddingTop: "56.25%", // 16:9 aspect ratio
+          }}
+        >
+          <video
+            src={video.videoUrl}
+            controls
+            autoPlay
+            onError={(e) => {
+              const target = e.currentTarget;
+              target.style.display = "none";
+              const errorDiv = document.createElement("div");
+              errorDiv.style.cssText = "position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);color:#fff;text-align:center;";
+              errorDiv.textContent = "Failed to load video";
+              target.parentElement?.appendChild(errorDiv);
+            }}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+            }}
+          />
+        </Box>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+// Profiles Tab Content Component with Video Player
+const ProfilesTabContent = ({ record }: { record: any }) => {
+  const [selectedVideo, setSelectedVideo] = useState<any>(null);
+  const [videoDialogOpen, setVideoDialogOpen] = useState(false);
+
+  const handlePlayVideo = (video: any) => {
+    setSelectedVideo(video);
+    setVideoDialogOpen(true);
+  };
+
+  const handleCloseVideo = () => {
+    setVideoDialogOpen(false);
+    setSelectedVideo(null);
+  };
+
+  return (
+    <Box>
+      {record.profiles && record.profiles.length > 0 ? (
+        record.profiles.map((profile: any, index: number) => (
+          <Card key={index} sx={{ mb: 2 }}>
+            <CardContent>
+              <Typography variant="h6">Profile {index + 1}</Typography>
+              <Divider sx={{ my: 1 }} />
+              {profile.bio && (
+                <Typography variant="body2" paragraph>
+                  <strong>Bio:</strong> {profile.bio}
+                </Typography>
+              )}
+              {profile.city && (
+                <Typography variant="body2">
+                  <strong>Location:</strong> {profile.city}, {profile.state}
+                </Typography>
+              )}
+              {profile.businessName && (
+                <Typography variant="body2">
+                  <strong>Business:</strong> {profile.businessName}
+                </Typography>
+              )}
+              {profile.industry && (
+                <Typography variant="body2">
+                  <strong>Industry:</strong> {profile.industry}
+                </Typography>
+              )}
+              <Typography
+                variant="caption"
+                color="textSecondary"
+                display="block"
+                sx={{ mt: 1 }}
+              >
+                Status: {profile.status} | Created:{" "}
+                {new Date(profile.createdAt).toLocaleDateString()}
+              </Typography>
+
+              {/* Videos Section - For Job Seekers */}
+              {profile.videos && profile.videos.length > 0 && (
+                <Box sx={{ mt: 3 }}>
+                  <Box display="flex" alignItems="center" gap={1} mb={2}>
+                    <VideoIcon color="primary" />
+                    <Typography variant="subtitle1" fontWeight={600}>
+                      Videos ({profile.videos.length})
+                    </Typography>
+                  </Box>
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: {
+                        xs: "repeat(1, 1fr)",
+                        sm: "repeat(2, 1fr)",
+                        md: "repeat(3, 1fr)",
+                      },
+                      gap: 2,
+                    }}
+                  >
+                    {profile.videos.map((video: any, vIndex: number) => (
+                      <Card
+                        key={vIndex}
+                        variant="outlined"
+                        sx={{
+                          bgcolor: video.isActive ? "inherit" : "#f5f5f5",
+                          opacity: video.isActive ? 1 : 0.7,
+                        }}
+                      >
+                        <CardContent>
+                          <Box
+                            display="flex"
+                            alignItems="center"
+                            justifyContent="space-between"
+                            mb={1}
+                          >
+                            <Typography
+                              variant="subtitle2"
+                              fontWeight={500}
+                              noWrap
+                              title={video.title}
+                              sx={{ flex: 1 }}
+                            >
+                              {video.title}
+                            </Typography>
+                            <Button
+                              size="small"
+                              variant="contained"
+                              color="primary"
+                              startIcon={<PlayIcon />}
+                              onClick={() => handlePlayVideo(video)}
+                              sx={{ ml: 1, minWidth: "auto" }}
+                            >
+                              Play
+                            </Button>
+                          </Box>
+                          {video.duration && (
+                            <Typography
+                              variant="caption"
+                              color="textSecondary"
+                              display="block"
+                              sx={{ mb: 1 }}
+                            >
+                              Duration: {Math.floor(video.duration / 60)}:
+                              {String(video.duration % 60).padStart(2, "0")}
+                            </Typography>
+                          )}
+                          <Box
+                            display="flex"
+                            justifyContent="space-between"
+                            alignItems="center"
+                            mt={1}
+                          >
+                            <Chip
+                              label={video.isActive ? "Active" : "Inactive"}
+                              size="small"
+                              color={video.isActive ? "success" : "default"}
+                            />
+                            <Typography variant="caption" color="textSecondary">
+                              Order: {video.order}
+                            </Typography>
+                          </Box>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+
+              {/* Company Sections - For Job Posters */}
+              {profile.companySections &&
+                profile.companySections.length > 0 && (
+                  <Box sx={{ mt: 3 }}>
+                    <Box display="flex" alignItems="center" gap={1} mb={2}>
+                      <ArticleIcon color="primary" />
+                      <Typography variant="subtitle1" fontWeight={600}>
+                        Company Sections ({profile.companySections.length})
+                      </Typography>
+                    </Box>
+                    {profile.companySections.map(
+                      (section: any, sIndex: number) => (
+                        <Card key={sIndex} variant="outlined" sx={{ mb: 2 }}>
+                          <CardContent>
+                            <Box
+                              display="flex"
+                              justifyContent="space-between"
+                              alignItems="center"
+                              mb={1}
+                            >
+                              <Typography variant="subtitle2" fontWeight={600}>
+                                {section.title}
+                              </Typography>
+                              <Box display="flex" alignItems="center" gap={1}>
+                                <Chip
+                                  label={
+                                    section.isExpanded
+                                      ? "Expanded"
+                                      : "Collapsed"
+                                  }
+                                  size="small"
+                                  variant="outlined"
+                                />
+                                <Typography
+                                  variant="caption"
+                                  color="textSecondary"
+                                >
+                                  Order: {section.order}
+                                </Typography>
+                              </Box>
+                            </Box>
+                            <Typography
+                              variant="body2"
+                              color="textSecondary"
+                              sx={{
+                                whiteSpace: "pre-wrap",
+                                maxHeight: 150,
+                                overflow: "auto",
+                              }}
+                            >
+                              {section.content}
+                            </Typography>
+                            <Typography
+                              variant="caption"
+                              color="textSecondary"
+                              display="block"
+                              sx={{ mt: 1 }}
+                            >
+                              Created:{" "}
+                              {new Date(section.createdAt).toLocaleDateString()}
+                            </Typography>
+                          </CardContent>
+                        </Card>
+                      )
+                    )}
+                  </Box>
+                )}
+            </CardContent>
+          </Card>
+        ))
+      ) : (
+        <Typography color="textSecondary">No profiles</Typography>
+      )}
+
+      {/* Video Player Dialog */}
+      <VideoPlayerDialog
+        open={videoDialogOpen}
+        onClose={handleCloseVideo}
+        video={selectedVideo}
+      />
+    </Box>
+  );
+};
+
 const userFilters = [
   <TextInput key="search" label="Search" source="search" alwaysOn />,
   <SelectInput
@@ -183,14 +696,65 @@ const userFilters = [
       { id: "jobPoster", name: "Job Poster" },
       { id: "admin", name: "Admin" },
     ]}
+    alwaysOn
   />,
-  <BooleanInput key="isActive" label="Active Only" source="isActive" />,
+  <SelectInput
+    key="isActive"
+    source="isActive"
+    label="Status"
+    choices={[
+      { id: "true", name: "Active" },
+      { id: "false", name: "Blocked" },
+    ]}
+    alwaysOn
+  />,
 ];
+
+// Custom exporter for users - matches list view columns
+const userExporter = (records: any[]) => {
+  const headers = [
+    "User",
+    "Email",
+    "Role",
+    "Active",
+    "Profile Complete",
+    "Last Login",
+    "Joined",
+  ];
+
+  const rows = records.map((record) => [
+    `${record.firstName || ""} ${record.lastName || ""}`.trim() || "N/A",
+    record.email || "",
+    record.roles?.map((r: string) => r.replace("_", " ")).join(", ") || "N/A",
+    record.isActive ? "Active" : "Blocked",
+    record.profileComplete ? "Complete" : "Incomplete",
+    record.lastLogin ? new Date(record.lastLogin).toLocaleString() : "Never",
+    new Date(record.createdAt).toLocaleString(),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `users-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
-    <ExportButton />
+    <ExportButton maxResults={5000} />
   </TopToolbar>
 );
 
@@ -199,22 +763,29 @@ export const UserList = () => (
     filters={userFilters}
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
+    exporter={userExporter}
+    storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="User"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
             <Avatar
               src={record.profileImage}
               alt={`${record.firstName} ${record.lastName}`}
-              sx={{ width: 40, height: 40 }}
+              sx={{ width: 40, height: 40, flexShrink: 0 }}
             >
               {record.firstName?.[0]}
               {record.lastName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.firstName} {record.lastName}
               </Typography>
             </Box>
@@ -223,15 +794,26 @@ export const UserList = () => (
       />
       <FunctionField
         label="Email"
+        sx={{ width: 220, minWidth: 220, maxWidth: 220 }}
         render={(record: any) => (
-          <Box display="flex" alignItems="center" gap={0.5}>
-            <EmailIcon sx={{ fontSize: 16, color: "text.secondary" }} />
+          <Box
+            display="flex"
+            alignItems="center"
+            gap={0.5}
+            sx={{ overflow: "hidden" }}
+          >
+            <EmailIcon
+              sx={{ fontSize: 16, color: "text.secondary", flexShrink: 0 }}
+            />
             <MUILink
               component={Link}
               to={`/users/${record.id}/show`}
               sx={{
                 color: "#8759F2",
                 textDecoration: "none",
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
                 "&:hover": {
                   textDecoration: "underline",
                 },
@@ -244,6 +826,7 @@ export const UserList = () => (
       />
       <FunctionField
         label="Role"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box>
             {record.roles?.map((role: string, index: number) => (
@@ -264,6 +847,7 @@ export const UserList = () => (
       />
       <FunctionField
         label="Active"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) => (
           <EnhancedChip
             status={record.isActive ? "active" : "rejected"}
@@ -273,6 +857,7 @@ export const UserList = () => (
       />
       <FunctionField
         label="Profile Complete"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <EnhancedChip
             status={record.profileComplete ? "completed" : "pending"}
@@ -284,11 +869,13 @@ export const UserList = () => (
         label="Last Login"
         sortable
         sortBy="lastLogin"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={
                 record.lastLogin
                   ? new Date(record.lastLogin).toLocaleString()
@@ -306,11 +893,13 @@ export const UserList = () => (
         label="Joined"
         sortable
         sortBy="createdAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.createdAt).toLocaleString()}
             >
               {formatRelativeTime(record.createdAt)}
@@ -320,11 +909,13 @@ export const UserList = () => (
       />
       <FunctionField
         label="Actions"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" gap={1}>
             <ShowButton />
             <BlockUserButton record={record} />
             <UnblockUserButton record={record} />
+            <DeleteUserButton record={record} />
           </Box>
         )}
       />
@@ -340,40 +931,50 @@ export const UserShow = () => (
           label="User Information"
           render={(record: any) => (
             <Box>
-              <Box display="flex" alignItems="center" gap={2} mb={3}>
-                <Avatar
-                  src={record.profileImage}
-                  alt={`${record.firstName} ${record.lastName}`}
-                  sx={{ width: 80, height: 80 }}
-                >
-                  {record.firstName?.[0]}
-                  {record.lastName?.[0]}
-                </Avatar>
-                <Box>
-                  <Typography variant="h5">
-                    {record.firstName} {record.lastName}
-                  </Typography>
-                  <Typography variant="body1" color="textSecondary">
-                    {record.email}
-                  </Typography>
-                  <Box mt={1}>
-                    {record.roles?.map((role: string, index: number) => (
-                      <Chip
-                        key={index}
-                        label={role.replace("_", " ")}
-                        size="small"
-                        sx={{ mr: 0.5 }}
-                        color={
-                          role === "admin"
-                            ? "error"
-                            : role === "job_poster"
-                            ? "primary"
-                            : "default"
-                        }
-                      />
-                    ))}
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="space-between"
+                mb={3}
+              >
+                <Box display="flex" alignItems="center" gap={2}>
+                  <Avatar
+                    src={record.profileImage}
+                    alt={`${record.firstName} ${record.lastName}`}
+                    sx={{ width: 80, height: 80 }}
+                  >
+                    {record.firstName?.[0]}
+                    {record.lastName?.[0]}
+                  </Avatar>
+                  <Box>
+                    <Typography variant="h5">
+                      {record.firstName} {record.lastName}
+                    </Typography>
+                    <Typography variant="body1" color="textSecondary">
+                      {record.email}
+                    </Typography>
+                    <Box mt={1}>
+                      {record.roles?.map((role: string, index: number) => (
+                        <Chip
+                          key={index}
+                          label={role.replace("_", " ")}
+                          size="small"
+                          sx={{ mr: 0.5 }}
+                          color={
+                            role === "admin"
+                              ? "error"
+                              : role === "job_poster"
+                              ? "primary"
+                              : "default"
+                          }
+                        />
+                      ))}
+                    </Box>
                   </Box>
                 </Box>
+                {!record.roles?.includes("admin") && (
+                  <DeleteUserButton record={record} showVariant="detailed" />
+                )}
               </Box>
 
               <Box
@@ -458,52 +1059,7 @@ export const UserShow = () => (
       <Tab label="Profiles">
         <FunctionField
           label="User Profiles"
-          render={(record: any) => (
-            <Box>
-              {record.profiles && record.profiles.length > 0 ? (
-                record.profiles.map((profile: any, index: number) => (
-                  <Card key={index} sx={{ mb: 2 }}>
-                    <CardContent>
-                      <Typography variant="h6">Profile {index + 1}</Typography>
-                      <Divider sx={{ my: 1 }} />
-                      {profile.bio && (
-                        <Typography variant="body2" paragraph>
-                          <strong>Bio:</strong> {profile.bio}
-                        </Typography>
-                      )}
-                      {profile.city && (
-                        <Typography variant="body2">
-                          <strong>Location:</strong> {profile.city},{" "}
-                          {profile.state}
-                        </Typography>
-                      )}
-                      {profile.businessName && (
-                        <Typography variant="body2">
-                          <strong>Business:</strong> {profile.businessName}
-                        </Typography>
-                      )}
-                      {profile.industry && (
-                        <Typography variant="body2">
-                          <strong>Industry:</strong> {profile.industry}
-                        </Typography>
-                      )}
-                      <Typography
-                        variant="caption"
-                        color="textSecondary"
-                        display="block"
-                        sx={{ mt: 1 }}
-                      >
-                        Status: {profile.status} | Created:{" "}
-                        {new Date(profile.createdAt).toLocaleDateString()}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                ))
-              ) : (
-                <Typography color="textSecondary">No profiles</Typography>
-              )}
-            </Box>
-          )}
+          render={(record: any) => <ProfilesTabContent record={record} />}
         />
       </Tab>
 

@@ -1,6 +1,47 @@
 import { AuthProvider } from "react-admin";
+import { jwtDecode } from "jwt-decode";
 
-const API_URL = process.env.REACT_APP_API_URL || "http://localhost:3001";
+const API_URL = process.env.REACT_APP_API_URL;
+
+if (!API_URL) {
+  throw new Error("REACT_APP_API_URL environment variable is required");
+}
+
+const SESSION_TIMEOUT_MS = 30 * 60 * 1000; // 30 minutes of inactivity
+const ACTIVITY_KEY = "lastActivity";
+
+function updateActivity() {
+  localStorage.setItem(ACTIVITY_KEY, Date.now().toString());
+}
+
+function isSessionExpired(): boolean {
+  const lastActivity = localStorage.getItem(ACTIVITY_KEY);
+  if (!lastActivity) return true;
+  return Date.now() - parseInt(lastActivity, 10) > SESSION_TIMEOUT_MS;
+}
+
+function isTokenExpired(token: string): boolean {
+  try {
+    const decoded = jwtDecode(token);
+    if (!decoded.exp) return false;
+    return decoded.exp * 1000 < Date.now();
+  } catch {
+    return true;
+  }
+}
+
+function clearAuth() {
+  localStorage.removeItem("auth");
+  localStorage.removeItem(ACTIVITY_KEY);
+}
+
+// Track user activity for session timeout
+if (typeof window !== "undefined") {
+  const activityEvents = ["mousedown", "keydown", "scroll", "touchstart"];
+  activityEvents.forEach((event) => {
+    window.addEventListener(event, updateActivity, { passive: true });
+  });
+}
 
 export const authProvider: AuthProvider = {
   login: async ({ username, password, email }) => {
@@ -18,19 +59,30 @@ export const authProvider: AuthProvider = {
 
       const data = await response.json();
 
-      console.log(data);
       // Check if user is admin
-      if (data.userType !== "admin") {
+      if (
+        !data.userRoles.some(
+          (role: { roleType: string }) => role.roleType === "admin"
+        )
+      ) {
         throw new Error("Access denied. Admin privileges required.");
       }
 
+      // Store only minimal required data
       localStorage.setItem(
         "auth",
         JSON.stringify({
           token: data.accessToken,
-          user: data,
+          user: {
+            id: data.id,
+            firstName: data.firstName,
+            lastName: data.lastName,
+            profileImage: data.profileImage,
+            userRoles: data.userRoles,
+          },
         })
       );
+      updateActivity();
 
       return Promise.resolve();
     } catch (error) {
@@ -39,19 +91,43 @@ export const authProvider: AuthProvider = {
   },
 
   logout: () => {
-    localStorage.removeItem("auth");
+    clearAuth();
     return Promise.resolve();
   },
 
   checkAuth: () => {
     const auth = localStorage.getItem("auth");
-    return auth ? Promise.resolve() : Promise.reject();
+    if (!auth) return Promise.reject();
+
+    try {
+      const { token } = JSON.parse(auth);
+
+      if (isTokenExpired(token)) {
+        clearAuth();
+        return Promise.reject({
+          message: "Session expired. Please login again.",
+        });
+      }
+
+      if (isSessionExpired()) {
+        clearAuth();
+        return Promise.reject({
+          message: "Session timed out due to inactivity.",
+        });
+      }
+
+      updateActivity();
+      return Promise.resolve();
+    } catch {
+      clearAuth();
+      return Promise.reject();
+    }
   },
 
   checkError: (error) => {
     const status = error.status;
     if (status === 401 || status === 403) {
-      localStorage.removeItem("auth");
+      clearAuth();
       return Promise.reject();
     }
     return Promise.resolve();
@@ -81,7 +157,20 @@ export const authProvider: AuthProvider = {
       return Promise.reject();
     }
 
-    const { user } = JSON.parse(auth);
-    return Promise.resolve(user.userType);
+    try {
+      const { token } = JSON.parse(auth);
+      if (isTokenExpired(token)) {
+        clearAuth();
+        return Promise.reject();
+      }
+
+      const { user } = JSON.parse(auth);
+      const adminRole = user.userRoles?.find(
+        (role: { roleType: string }) => role.roleType === "admin"
+      );
+      return Promise.resolve(adminRole ? "admin" : "user");
+    } catch {
+      return Promise.reject();
+    }
   },
 };

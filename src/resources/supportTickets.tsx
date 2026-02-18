@@ -13,7 +13,6 @@ import {
   Button as RAButton,
   TextInput,
   SelectInput,
-  FilterButton,
   TopToolbar,
   ExportButton,
   ShowButton,
@@ -61,6 +60,7 @@ const ticketFilters = [
       { id: "resolved", name: "Resolved" },
       { id: "closed", name: "Closed" },
     ]}
+    alwaysOn
   />,
   <SelectInput
     key="category"
@@ -70,7 +70,9 @@ const ticketFilters = [
       { id: "account", name: "Account" },
       { id: "application_job", name: "Application/Job" },
       { id: "general", name: "General" },
+      { id: "account_deletion", name: "Account Deletion" },
     ]}
+    alwaysOn
   />,
   <SelectInput
     key="priority"
@@ -81,6 +83,7 @@ const ticketFilters = [
       { id: "high", name: "High" },
       { id: "urgent", name: "Urgent" },
     ]}
+    alwaysOn
   />,
 ];
 
@@ -301,11 +304,60 @@ const UpdatePriorityButton = ({ record }: any) => {
   );
 };
 
+// Custom exporter for support tickets - matches list view columns
+const supportTicketExporter = (records: any[]) => {
+  const headers = [
+    "User",
+    "User Email",
+    "Title",
+    "Category",
+    "Status",
+    "Priority",
+    "Created",
+  ];
+
+  const formatValue = (value: string) => {
+    return value
+      ? value.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+      : "N/A";
+  };
+
+  const rows = records.map((record) => [
+    record.userName || "Unknown",
+    record.userEmail || "No email",
+    record.title || "N/A",
+    formatValue(record.category),
+    formatValue(record.status),
+    record.priority ? formatValue(record.priority) : "Not Set",
+    new Date(record.createdAt).toLocaleString(),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `support-tickets-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 // List Actions
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
-    <ExportButton />
+    <ExportButton maxResults={5000} />
   </TopToolbar>
 );
 
@@ -315,21 +367,35 @@ export const SupportTicketList = () => (
     filters={ticketFilters}
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
+    exporter={supportTicketExporter}
     perPage={25}
+    storeKey={false}
   >
-    <Datagrid rowClick="show" bulkActionButtons={false}>
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="User"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: "primary.main",
+                flexShrink: 0,
+              }}
+            >
               <PersonIcon sx={{ fontSize: 20 }} />
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={600}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={600} noWrap>
                 {record.userName || "Unknown"}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {record.userEmail || "No email"}
               </Typography>
             </Box>
@@ -339,22 +405,29 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Title"
+        sx={{ width: 220, minWidth: 220, maxWidth: 220 }}
         render={(record: any) => (
-          <Box>
-            <Typography variant="body2" fontWeight={600}>
-              {record.title}
-            </Typography>
-            <Chip
-              label={record.category.replace("_", " ")}
-              size="small"
-              variant="outlined"
-            />
-          </Box>
+          <Typography variant="body2" fontWeight={600} noWrap>
+            {record.title}
+          </Typography>
+        )}
+      />
+
+      <FunctionField
+        label="Category"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
+        render={(record: any) => (
+          <Chip
+            label={record.category?.replace("_", " ") || "N/A"}
+            size="small"
+            variant="outlined"
+          />
         )}
       />
 
       <FunctionField
         label="Status"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Chip
             icon={getStatusIcon(record.status)}
@@ -367,6 +440,7 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Priority"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) =>
           record.priority ? (
             <Chip
@@ -382,8 +456,9 @@ export const SupportTicketList = () => (
 
       <FunctionField
         label="Created"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" noWrap>
             {formatRelativeTime(record.createdAt)}
           </Typography>
         )}

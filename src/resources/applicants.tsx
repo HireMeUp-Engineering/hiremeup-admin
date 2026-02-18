@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 import {
   List,
   Datagrid,
@@ -8,23 +8,20 @@ import {
   SimpleShowLayout,
   FunctionField,
   ChipField,
-  EmailField,
-  NumberField,
-  FilterButton,
   TopToolbar,
   ExportButton,
   TextInput,
   SelectInput,
   ShowButton,
-} from 'react-admin';
-import { Box, Typography, Chip, Avatar } from '@mui/material';
+} from "react-admin";
+import { Box, Typography, Chip, Avatar } from "@mui/material";
 import {
   People as PeopleIcon,
   Star as StarIcon,
   CalendarToday,
-} from '@mui/icons-material';
-import { EnhancedChip } from '../components/shared/EnhancedChip';
-import { formatRelativeTime } from '../utils/dateFormatters';
+} from "@mui/icons-material";
+import { EnhancedChip } from "../components/shared/EnhancedChip";
+import { formatRelativeTime } from "../utils/dateFormatters";
 
 const applicantFilters = [
   <TextInput key="search" label="Search" source="q" alwaysOn />,
@@ -32,20 +29,68 @@ const applicantFilters = [
     key="status"
     source="status"
     choices={[
-      { id: 'pending', name: 'Pending' },
-      { id: 'in_queue', name: 'In Queue' },
-      { id: 'reviewed', name: 'Reviewed' },
-      { id: 'shortlisted', name: 'Shortlisted' },
-      { id: 'rejected', name: 'Rejected' },
-      { id: 'hired', name: 'Hired' },
+      { id: "pending", name: "Pending" },
+      { id: "in_queue", name: "In Queue" },
+      { id: "reviewed", name: "Reviewed" },
+      { id: "shortlisted", name: "Shortlisted" },
+      { id: "rejected", name: "Rejected" },
+      { id: "hired", name: "Hired" },
     ]}
+    alwaysOn
   />,
 ];
 
+// Custom exporter for applicants - matches list view columns
+const applicantExporter = (records: any[]) => {
+  const headers = [
+    "Applicant",
+    "Applicant Email",
+    "Job Post",
+    "Status",
+    "Rating",
+    "Applied",
+  ];
+
+  const formatStatus = (status: string) => {
+    return status
+      ? status.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())
+      : "";
+  };
+
+  const rows = records.map((record) => [
+    `${record.applicant?.firstName || ""} ${
+      record.applicant?.lastName || ""
+    }`.trim() || "N/A",
+    record.applicant?.email || "",
+    record.jobPost?.jobTitle || "N/A",
+    formatStatus(record.status || ""),
+    record.rating ? `${record.rating}/5` : "Not rated",
+    new Date(record.appliedAt).toLocaleString(),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `applicants-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
-    <ExportButton />
+    <ExportButton maxResults={5000} />
   </TopToolbar>
 );
 
@@ -53,26 +98,33 @@ export const ApplicantList = () => (
   <List
     filters={applicantFilters}
     actions={<ListActions />}
-    sort={{ field: 'appliedAt', order: 'DESC' }}
+    sort={{ field: "appliedAt", order: "DESC" }}
+    exporter={applicantExporter}
+    storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="Applicant"
+        sx={{ width: 250, minWidth: 250, maxWidth: 250 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
             <Avatar
               src={record.applicant?.profileImage}
               alt={`${record.applicant?.firstName} ${record.applicant?.lastName}`}
-              sx={{ width: 40, height: 40 }}
+              sx={{ width: 40, height: 40, flexShrink: 0 }}
             >
               {record.applicant?.firstName?.[0]}
               {record.applicant?.lastName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.applicant?.firstName} {record.applicant?.lastName}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.applicant?.email}
               </Typography>
             </Box>
@@ -81,20 +133,27 @@ export const ApplicantList = () => (
       />
       <FunctionField
         label="Job Post"
-        render={(record: any) => record.jobPost?.jobTitle || 'N/A'}
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
+        render={(record: any) => (
+          <Typography variant="body2" noWrap>
+            {record.jobPost?.jobTitle || "N/A"}
+          </Typography>
+        )}
       />
       <FunctionField
         label="Status"
         sortable
         sortBy="status"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Rating"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) =>
           record.rating ? (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <StarIcon sx={{ fontSize: 16, color: '#FFD700' }} />
+              <StarIcon sx={{ fontSize: 16, color: "#FFD700" }} />
               <Typography variant="body2">{record.rating}/5</Typography>
             </Box>
           ) : (
@@ -108,10 +167,15 @@ export const ApplicantList = () => (
         label="Applied"
         sortable
         sortBy="appliedAt"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
-            <CalendarToday sx={{ fontSize: 14, color: 'text.secondary' }} />
-            <Typography variant="body2" title={new Date(record.appliedAt).toLocaleString()}>
+            <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
+            <Typography
+              variant="body2"
+              noWrap
+              title={new Date(record.appliedAt).toLocaleString()}
+            >
               {formatRelativeTime(record.appliedAt)}
             </Typography>
           </Box>
@@ -167,7 +231,8 @@ export const ApplicantShow = () => (
               {record.jobPost?.companyName} - {record.jobPost?.location}
             </Typography>
             <Typography variant="body2" color="textSecondary">
-              Type: {record.jobPost?.jobType} | Workplace: {record.jobPost?.workplaceType}
+              Type: {record.jobPost?.jobType} | Workplace:{" "}
+              {record.jobPost?.workplaceType}
             </Typography>
           </Box>
         )}
@@ -180,7 +245,7 @@ export const ApplicantShow = () => (
         render={(record: any) =>
           record.rating ? (
             <Box display="flex" alignItems="center" gap={0.5}>
-              <StarIcon sx={{ fontSize: 20, color: '#FFD700' }} />
+              <StarIcon sx={{ fontSize: 20, color: "#FFD700" }} />
               <Typography variant="h6">{record.rating}/5</Typography>
             </Box>
           ) : (
@@ -199,10 +264,10 @@ export const ApplicantShow = () => (
           record.screeningResponse ? (
             <Box>
               <Typography variant="body2">
-                Video: {record.screeningResponse.videoUrl ? 'Yes' : 'No'}
+                Video: {record.screeningResponse.videoUrl ? "Yes" : "No"}
               </Typography>
               <Typography variant="body2">
-                Audio: {record.screeningResponse.audioUrl ? 'Yes' : 'No'}
+                Audio: {record.screeningResponse.audioUrl ? "Yes" : "No"}
               </Typography>
               {record.screeningResponse.transcription && (
                 <Typography variant="body2" mt={1}>

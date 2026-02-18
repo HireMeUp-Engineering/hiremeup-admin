@@ -9,7 +9,6 @@ import {
   TextInput,
   SelectInput,
   NumberInput,
-  FilterButton,
   TopToolbar,
   ExportButton,
   ShowButton,
@@ -45,6 +44,7 @@ const feedbackFilters = [
       { id: "bug_report", name: "Bug Report" },
       { id: "general_feedback", name: "General Feedback" },
     ]}
+    alwaysOn
   />,
   <NumberInput
     key="minRating"
@@ -52,6 +52,7 @@ const feedbackFilters = [
     label="Min Rating"
     min={1}
     max={5}
+    alwaysOn
   />,
   <NumberInput
     key="maxRating"
@@ -59,6 +60,7 @@ const feedbackFilters = [
     label="Max Rating"
     min={1}
     max={5}
+    alwaysOn
   />,
   <SelectInput
     key="isFlagged"
@@ -68,6 +70,7 @@ const feedbackFilters = [
       { id: "true", name: "Yes" },
       { id: "false", name: "No" },
     ]}
+    alwaysOn
   />,
 ];
 
@@ -111,11 +114,54 @@ const getRatingColor = (rating: number) => {
   return "error";
 };
 
+// Custom exporter for feedback - matches list view columns
+const feedbackExporter = (records: any[]) => {
+  const headers = [
+    "User",
+    "User Email",
+    "Rating",
+    "Category",
+    "Description",
+    "Status",
+    "Submitted",
+  ];
+
+  const rows = records.map((record) => [
+    record.userName || "Unknown",
+    record.userEmail || "No email",
+    record.rating ? `${record.rating}/5` : "N/A",
+    formatCategory(record.category || ""),
+    record.description || "",
+    record.reviewedAt ? "Reviewed" : "Pending",
+    new Date(record.createdAt).toLocaleString(),
+  ]);
+
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) =>
+      row.map((cell) => `"${String(cell).replace(/"/g, '""')}"`).join(",")
+    ),
+  ].join("\n");
+
+  const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+  const link = document.createElement("a");
+  const url = URL.createObjectURL(blob);
+  link.setAttribute("href", url);
+  link.setAttribute(
+    "download",
+    `feedback-${new Date().toISOString().split("T")[0]}.csv`
+  );
+  link.style.visibility = "hidden";
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  URL.revokeObjectURL(url);
+};
+
 // List Actions
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
-    <ExportButton />
+    <ExportButton maxResults={5000} />
   </TopToolbar>
 );
 
@@ -125,21 +171,35 @@ export const FeedbackList = () => (
     filters={feedbackFilters}
     actions={<ListActions />}
     sort={{ field: "createdAt", order: "DESC" }}
+    exporter={feedbackExporter}
     perPage={25}
+    storeKey={false}
   >
-    <Datagrid rowClick="show" bulkActionButtons={false}>
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="User"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-            <Avatar sx={{ width: 32, height: 32, bgcolor: "primary.main" }}>
+            <Avatar
+              sx={{
+                width: 32,
+                height: 32,
+                bgcolor: "primary.main",
+                flexShrink: 0,
+              }}
+            >
               <PersonIcon sx={{ fontSize: 20 }} />
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={600}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={600} noWrap>
                 {record.userName || "Unknown"}
               </Typography>
-              <Typography variant="caption" color="text.secondary">
+              <Typography variant="caption" color="text.secondary" noWrap>
                 {record.userEmail || "No email"}
               </Typography>
             </Box>
@@ -149,6 +209,7 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Rating"
+        sx={{ width: 160, minWidth: 160, maxWidth: 160 }}
         render={(record: any) => (
           <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
             <Rating value={record.rating} readOnly size="small" />
@@ -163,6 +224,7 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Category"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <Chip
             icon={getCategoryIcon(record.category)}
@@ -175,9 +237,10 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Description"
+        sx={{ width: 280, minWidth: 280, maxWidth: 280 }}
         render={(record: any) => (
           <Box>
-            <Typography variant="body2" noWrap sx={{ maxWidth: 300 }}>
+            <Typography variant="body2" noWrap>
               {record.description}
             </Typography>
             {record.isFlagged && (
@@ -195,6 +258,7 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Status"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) =>
           record.reviewedAt ? (
             <Chip
@@ -216,8 +280,9 @@ export const FeedbackList = () => (
 
       <FunctionField
         label="Submitted"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
-          <Typography variant="body2" color="text.secondary">
+          <Typography variant="body2" color="text.secondary" noWrap>
             {formatRelativeTime(record.createdAt)}
           </Typography>
         )}
@@ -235,8 +300,7 @@ export const FeedbackShow = () => {
   // Automatically mark as reviewed when admin views it
   React.useEffect(() => {
     if (record && !record.reviewedAt) {
-      // The backend automatically marks it as reviewed, just log it
-      console.log("Feedback viewed by admin:", record.id);
+      // The backend automatically marks it as reviewed
     }
   }, [record]);
 

@@ -1,6 +1,42 @@
-import React from "react";
-import { Layout as RALayout, AppBar } from "react-admin";
-import { Box, Typography } from "@mui/material";
+import React, { forwardRef } from "react";
+import { Layout as RALayout, AppBar, UserMenu, Logout } from "react-admin";
+import { Box, Typography, MenuItem, ListItemIcon, ListItemText } from "@mui/material";
+import DescriptionIcon from "@mui/icons-material/Description";
+import PrivacyTipIcon from "@mui/icons-material/PrivacyTip";
+
+const TermsAndConditionsMenuItem = forwardRef<HTMLLIElement, any>((props, ref) => (
+  <MenuItem
+    ref={ref}
+    onClick={() => window.open("https://www.hiremeup.com/hire-me-up-terms-and-conditions", "_blank")}
+    {...props}
+  >
+    <ListItemIcon>
+      <DescriptionIcon fontSize="small" />
+    </ListItemIcon>
+    <ListItemText>Terms and Conditions</ListItemText>
+  </MenuItem>
+));
+
+const PrivacyPolicyMenuItem = forwardRef<HTMLLIElement, any>((props, ref) => (
+  <MenuItem
+    ref={ref}
+    onClick={() => window.open("https://www.hiremeup.com/hire-me-up-privacy-policy", "_blank")}
+    {...props}
+  >
+    <ListItemIcon>
+      <PrivacyTipIcon fontSize="small" />
+    </ListItemIcon>
+    <ListItemText>Privacy Policy</ListItemText>
+  </MenuItem>
+));
+
+const CustomUserMenu = () => (
+  <UserMenu>
+    <TermsAndConditionsMenuItem />
+    <PrivacyPolicyMenuItem />
+    <Logout />
+  </UserMenu>
+);
 
 const CustomAppBar = () => (
   <AppBar
@@ -15,7 +51,7 @@ const CustomAppBar = () => (
         paddingRight: 2,
       },
     }}
-    userMenu
+    userMenu={<CustomUserMenu />}
   >
     <Box
       sx={{

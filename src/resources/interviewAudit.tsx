@@ -9,7 +9,6 @@ import {
   SelectInput,
   DateInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -27,6 +26,8 @@ import {
   PlayCircle as PlayCircleIcon,
   CalendarToday,
   Videocam,
+  LocationOn,
+  Handshake,
 } from "@mui/icons-material";
 import { EnhancedChip } from "../components/shared/EnhancedChip";
 import { formatRelativeTime } from "../utils/dateFormatters";
@@ -42,9 +43,21 @@ const interviewFilters = [
       { id: "completed", name: "Completed" },
       { id: "cancelled", name: "Cancelled" },
     ]}
+    alwaysOn
   />,
-  <DateInput key="startDate" label="From Date" source="startDate" />,
-  <DateInput key="endDate" label="To Date" source="endDate" />,
+  <SelectInput
+    key="interviewType"
+    source="interviewType"
+    label="Interview Type"
+    choices={[
+      { id: "video", name: "Video" },
+      { id: "in_person", name: "In Person" },
+      { id: "extend_offer", name: "Extend Offer" },
+    ]}
+    alwaysOn
+  />,
+  <DateInput key="startDate" label="From Date" source="startDate" alwaysOn />,
+  <DateInput key="endDate" label="To Date" source="endDate" alwaysOn />,
 ];
 
 const getStatusColor = (status: string) => {
@@ -67,36 +80,61 @@ const formatStatus = (status: string) => {
   return statusMap[status] || status;
 };
 
-// Custom exporter for interview audit
+const getInterviewTypeColor = (type: string) => {
+  const typeColors: { [key: string]: string } = {
+    video: "#2196f3",
+    in_person: "#9c27b0",
+    extend_offer: "#4caf50",
+  };
+  return typeColors[type] || "#757575";
+};
+
+const formatInterviewType = (type: string) => {
+  const typeMap: { [key: string]: string } = {
+    video: "Video",
+    in_person: "In Person",
+    extend_offer: "Extend Offer",
+  };
+  return typeMap[type] || type || "Video";
+};
+
+const getInterviewTypeIcon = (type: string) => {
+  switch (type) {
+    case "in_person":
+      return <LocationOn sx={{ fontSize: 16 }} />;
+    case "extend_offer":
+      return <Handshake sx={{ fontSize: 16 }} />;
+    default:
+      return <Videocam sx={{ fontSize: 16 }} />;
+  }
+};
+
+// Custom exporter for interview audit - matches list view columns
 const interviewAuditExporter = (records: any[]) => {
   const headers = [
-    "Interviewee Name",
+    "Interviewee",
     "Interviewee Email",
-    "Interviewer Name",
+    "Interviewer",
     "Interviewer Email",
-    "Job Title",
+    "Job Post",
     "Status",
-    "Has Recording",
-    "Duration (minutes)",
+    "Type",
+    "Recording",
+    "Duration",
     "Scheduled",
-    "Started",
-    "Ended",
   ];
 
   const rows = records.map((record) => [
-    record.intervieweeName || "",
+    record.intervieweeName || "N/A",
     record.intervieweeEmail || "",
-    record.interviewerName || "",
+    record.interviewerName || "N/A",
     record.interviewerEmail || "",
     record.jobTitle || "N/A",
     formatStatus(record.status || ""),
+    formatInterviewType(record.interviewType),
     record.recordingUrl ? "Yes" : "No",
-    record.durationMinutes || "N/A",
+    record.durationMinutes ? `${record.durationMinutes} min` : "N/A",
     new Date(record.scheduledAt).toLocaleString(),
-    record.startedAt
-      ? new Date(record.startedAt).toLocaleString()
-      : "Not started",
-    record.endedAt ? new Date(record.endedAt).toLocaleString() : "Not ended",
   ]);
 
   const csvContent = [
@@ -116,11 +154,11 @@ const interviewAuditExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton maxResults={5000} />
   </TopToolbar>
 );
@@ -132,22 +170,26 @@ export const InterviewAuditList = () => (
     sort={{ field: "scheduledAt", order: "DESC" }}
     exporter={interviewAuditExporter}
     perPage={20}
+    storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="Interviewee"
-        sortable
-        sortBy="intervieweeName"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.intervieweeName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.intervieweeName || "N/A"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.intervieweeEmail || ""}
               </Typography>
             </Box>
@@ -156,18 +198,17 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Interviewer"
-        sortable
-        sortBy="interviewerName"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.interviewerName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.interviewerName || "N/A"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.interviewerEmail || ""}
               </Typography>
             </Box>
@@ -176,22 +217,38 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Job Post"
-        sortable
-        sortBy="jobTitle"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2" noWrap sx={{ maxWidth: 200 }}>
+          <Typography variant="body2" noWrap>
             {record.jobTitle || "N/A"}
           </Typography>
         )}
       />
       <FunctionField
         label="Status"
-        sortable
-        sortBy="status"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
+        label="Type"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
+        render={(record: any) => (
+          <Box display="flex" alignItems="center" gap={0.5}>
+            {getInterviewTypeIcon(record.interviewType)}
+            <Chip
+              label={formatInterviewType(record.interviewType)}
+              size="small"
+              sx={{
+                bgcolor: getInterviewTypeColor(record.interviewType),
+                color: "white",
+              }}
+            />
+          </Box>
+        )}
+      />
+      <FunctionField
         label="Recording"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             {record.recordingUrl && (
@@ -208,8 +265,7 @@ export const InterviewAuditList = () => (
       />
       <FunctionField
         label="Duration"
-        sortable
-        sortBy="durationMinutes"
+        sx={{ width: 90, minWidth: 90, maxWidth: 90 }}
         render={(record: any) =>
           record.durationMinutes ? (
             <Typography variant="body2">
@@ -226,11 +282,13 @@ export const InterviewAuditList = () => (
         label="Scheduled"
         sortable
         sortBy="scheduledAt"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.scheduledAt).toLocaleString()}
             >
               {formatRelativeTime(record.scheduledAt)}
@@ -308,9 +366,45 @@ export const InterviewAuditShow = () => (
                   />
                 </Typography>
 
-                <Typography variant="body2" sx={{ mb: 1 }}>
-                  <strong>Room ID:</strong> {record.roomId}
-                </Typography>
+                <Box display="flex" alignItems="center" gap={1} mb={1}>
+                  <Typography variant="body2">
+                    <strong>Interview Type:</strong>
+                  </Typography>
+                  {getInterviewTypeIcon(record.interviewType)}
+                  <Chip
+                    label={formatInterviewType(record.interviewType)}
+                    size="small"
+                    sx={{
+                      bgcolor: getInterviewTypeColor(record.interviewType),
+                      color: "white",
+                    }}
+                  />
+                  {record.isExtendOffer && (
+                    <Chip
+                      label="Offer Meeting"
+                      size="small"
+                      color="success"
+                      variant="outlined"
+                    />
+                  )}
+                </Box>
+
+                {record.location && (
+                  <Box display="flex" alignItems="center" gap={0.5} mb={1}>
+                    <LocationOn
+                      sx={{ fontSize: 18, color: "text.secondary" }}
+                    />
+                    <Typography variant="body2">
+                      <strong>Location:</strong> {record.location}
+                    </Typography>
+                  </Box>
+                )}
+
+                {record.roomId && (
+                  <Typography variant="body2" sx={{ mb: 1 }}>
+                    <strong>Room ID:</strong> {record.roomId}
+                  </Typography>
+                )}
 
                 <Typography variant="body2" sx={{ mb: 1 }}>
                   <strong>Scheduled At:</strong>{" "}
@@ -367,6 +461,7 @@ export const InterviewAuditShow = () => (
                     <video
                       src={record.recordingUrl}
                       controls
+                      onError={(e) => { e.currentTarget.style.display = "none"; }}
                       style={{ width: "100%", maxWidth: 800, borderRadius: 8 }}
                     />
                   </Box>

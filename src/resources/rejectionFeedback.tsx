@@ -8,7 +8,6 @@ import {
   TextInput,
   DateInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -31,8 +30,8 @@ import { formatRelativeTime } from "../utils/dateFormatters";
 
 const rejectionFilters = [
   <TextInput key="search" label="Search" source="search" alwaysOn />,
-  <DateInput key="startDate" label="From Date" source="startDate" />,
-  <DateInput key="endDate" label="To Date" source="endDate" />,
+  <DateInput key="startDate" label="From Date" source="startDate" alwaysOn />,
+  <DateInput key="endDate" label="To Date" source="endDate" alwaysOn />,
 ];
 
 const formatScreeningType = (type: string) => {
@@ -46,27 +45,36 @@ const formatScreeningType = (type: string) => {
   return typeMap[type] || type;
 };
 
-// Custom exporter for rejection feedback
+// Custom exporter for rejection feedback - matches list view columns
 const rejectionFeedbackExporter = (records: any[]) => {
   const headers = [
-    "Applicant Name",
-    "Job Title",
+    "Applicant",
+    "Job Post",
     "Screening Type",
-    "Rejection Reason",
-    "Has Video",
-    "Has Audio",
+    "Reason",
+    "Has Media",
     "Rejected On",
   ];
 
-  const rows = records.map((record) => [
-    record.applicantName || "N/A",
-    record.jobTitle || "N/A",
-    formatScreeningType(record.screeningType || ""),
-    record.responseText || "",
-    record.responseVideoUrl ? "Yes" : "No",
-    record.responseAudioUrl ? "Yes" : "No",
-    new Date(record.createdAt).toLocaleString(),
-  ]);
+  const rows = records.map((record) => {
+    let hasMedia = "None";
+    if (record.responseVideoUrl && record.responseAudioUrl) {
+      hasMedia = "Video, Audio";
+    } else if (record.responseVideoUrl) {
+      hasMedia = "Video";
+    } else if (record.responseAudioUrl) {
+      hasMedia = "Audio";
+    }
+
+    return [
+      record.applicantName || "N/A",
+      record.jobTitle || "N/A",
+      formatScreeningType(record.screeningType || ""),
+      record.responseText || "N/A",
+      hasMedia,
+      new Date(record.createdAt).toLocaleString(),
+    ];
+  });
 
   const csvContent = [
     headers.join(","),
@@ -85,11 +93,11 @@ const rejectionFeedbackExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton maxResults={5000} />
   </TopToolbar>
 );
@@ -101,18 +109,20 @@ export const RejectionFeedbackList = () => (
     sort={{ field: "createdAt", order: "DESC" }}
     exporter={rejectionFeedbackExporter}
     perPage={20}
+    storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid rowClick="show" sx={{ tableLayout: "fixed", width: "100%" }}>
       <FunctionField
         label="Applicant"
         sortable
         sortBy="applicantName"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.applicantName?.[0]}
             </Avatar>
-            <Typography variant="body2" fontWeight={500}>
+            <Typography variant="body2" fontWeight={500} noWrap>
               {record.applicantName || "N/A"}
             </Typography>
           </Box>
@@ -122,14 +132,18 @@ export const RejectionFeedbackList = () => (
         label="Job Post"
         sortable
         sortBy="jobTitle"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2">{record.jobTitle || "N/A"}</Typography>
+          <Typography variant="body2" noWrap>
+            {record.jobTitle || "N/A"}
+          </Typography>
         )}
       />
       <FunctionField
         label="Screening Type"
         sortable
         sortBy="screeningType"
+        sx={{ width: 140, minWidth: 140, maxWidth: 140 }}
         render={(record: any) => (
           <EnhancedChip
             status={
@@ -144,14 +158,16 @@ export const RejectionFeedbackList = () => (
       />
       <FunctionField
         label="Reason"
+        sx={{ width: 250, minWidth: 250, maxWidth: 250 }}
         render={(record: any) => (
-          <Typography variant="body2" noWrap sx={{ maxWidth: 300 }}>
+          <Typography variant="body2" noWrap>
             {record.responseText || "N/A"}
           </Typography>
         )}
       />
       <FunctionField
         label="Has Media"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => (
           <Box display="flex" gap={0.5} alignItems="center">
             {record.responseVideoUrl && (
@@ -188,11 +204,13 @@ export const RejectionFeedbackList = () => (
         label="Rejected On"
         sortable
         sortBy="createdAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.createdAt).toLocaleString()}
             >
               {formatRelativeTime(record.createdAt)}
@@ -286,6 +304,7 @@ export const RejectionFeedbackShow = () => (
                         src={record.responseVideoUrl}
                         controls
                         poster={record.responseThumbnailUrl}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                         style={{
                           width: "100%",
                           maxWidth: 800,

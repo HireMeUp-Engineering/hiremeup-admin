@@ -14,7 +14,6 @@ import {
   SelectInput,
   NumberInput,
   ShowButton,
-  FilterButton,
   TopToolbar,
   ExportButton,
 } from "react-admin";
@@ -28,7 +27,6 @@ import {
   Typography,
   Avatar,
   Chip,
-  TextField as MUITextField,
   Rating,
   Select,
   MenuItem,
@@ -41,92 +39,12 @@ import {
 import {
   Assignment as AssignmentIcon,
   Star as StarIcon,
-  Note as NoteIcon,
   ChangeCircle as ChangeCircleIcon,
   CalendarToday,
   Videocam,
 } from "@mui/icons-material";
 import { EnhancedChip } from "../components/shared/EnhancedChip";
 import { formatRelativeTime } from "../utils/dateFormatters";
-
-const UpdateNotesButton = ({ record }: any) => {
-  const [open, setOpen] = useState(false);
-  const [notes, setNotes] = useState(record.notes || "");
-  const dataProvider = useDataProvider();
-  const notify = useNotify();
-  const refresh = useRefresh();
-
-  const handleSave = async () => {
-    try {
-      await dataProvider.update("adminApplications", {
-        id: record.id,
-        data: { notes },
-        previousData: record,
-      });
-      notify("Notes updated successfully", { type: "success" });
-      setOpen(false);
-      refresh();
-    } catch (error: any) {
-      notify(`Error: ${error.message}`, { type: "error" });
-    }
-  };
-
-  return (
-    <>
-      <RAButton
-        label="Notes"
-        onClick={(e) => {
-          e.stopPropagation();
-          setOpen(true);
-        }}
-      >
-        <NoteIcon />
-      </RAButton>
-
-      <Dialog
-        open={open}
-        onClose={() => setOpen(false)}
-        maxWidth="md"
-        fullWidth
-        onClick={(e) => e.stopPropagation()}
-      >
-        <DialogTitle>Update Admin Notes</DialogTitle>
-        <DialogContent onClick={(e) => e.stopPropagation()}>
-          <MUITextField
-            label="Notes"
-            multiline
-            rows={6}
-            fullWidth
-            value={notes}
-            onChange={(e) => setNotes(e.target.value)}
-            sx={{ mt: 2 }}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              setOpen(false);
-            }}
-          >
-            Cancel
-          </Button>
-          <Button
-            onClick={(e) => {
-              e.preventDefault();
-              handleSave();
-            }}
-            variant="contained"
-            color="primary"
-            startIcon={<NoteIcon />}
-          >
-            Save Notes
-          </Button>
-        </DialogActions>
-      </Dialog>
-    </>
-  );
-};
 
 const UpdateRatingButton = ({ record }: any) => {
   const [open, setOpen] = useState(false);
@@ -310,8 +228,14 @@ const applicationFilters = [
       { id: "rejected", name: "Rejected" },
       { id: "hired", name: "Hired" },
     ]}
+    alwaysOn
   />,
-  <NumberInput key="minRating" label="Min Rating" source="minRating" />,
+  <NumberInput
+    key="minRating"
+    label="Min Rating"
+    source="minRating"
+    alwaysOn
+  />,
 ];
 
 const getStatusColor = (status: string) => {
@@ -338,34 +262,28 @@ const formatStatus = (status: string) => {
   return statusMap[status] || status;
 };
 
-// Custom exporter for applications
+// Custom exporter for applications - matches list view columns
 const applicationExporter = (records: any[]) => {
   const headers = [
-    "Applicant Name",
+    "Applicant",
     "Applicant Email",
-    "Job Title",
+    "Job Post",
     "Status",
     "Rating",
     "Has Video",
-    "Has Feedback",
-    "Interview Count",
+    "Interviews",
     "Applied",
-    "Reviewed",
   ];
 
   const rows = records.map((record) => [
-    record.applicantName || "",
+    record.applicantName || "N/A",
     record.applicantEmail || "",
-    record.jobTitle || "",
+    record.jobTitle || "N/A",
     formatStatus(record.status || ""),
-    record.rating || "Not rated",
+    record.rating ? `${record.rating}/5` : "Not rated",
     record.hasVideo ? "Yes" : "No",
-    record.hasFeedback ? "Yes" : "No",
     record.interviewCount || 0,
     new Date(record.appliedAt).toLocaleString(),
-    record.reviewedAt
-      ? new Date(record.reviewedAt).toLocaleString()
-      : "Not reviewed",
   ]);
 
   const csvContent = [
@@ -385,11 +303,11 @@ const applicationExporter = (records: any[]) => {
   document.body.appendChild(link);
   link.click();
   document.body.removeChild(link);
+  URL.revokeObjectURL(url);
 };
 
 const ListActions = () => (
   <TopToolbar>
-    <FilterButton />
     <ExportButton maxResults={5000} />
   </TopToolbar>
 );
@@ -401,22 +319,26 @@ export const AdminApplicationList = () => (
     sort={{ field: "appliedAt", order: "DESC" }}
     exporter={applicationExporter}
     perPage={20}
+    storeKey={false}
   >
-    <Datagrid rowClick="show">
+    <Datagrid
+      rowClick="show"
+      bulkActionButtons={false}
+      sx={{ tableLayout: "fixed", width: "100%" }}
+    >
       <FunctionField
         label="Applicant"
-        sortable
-        sortBy="applicantName"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={1}>
-            <Avatar sx={{ width: 36, height: 36 }}>
+            <Avatar sx={{ width: 36, height: 36, flexShrink: 0 }}>
               {record.applicantName?.[0]}
             </Avatar>
-            <Box>
-              <Typography variant="body2" fontWeight={500}>
+            <Box sx={{ overflow: "hidden" }}>
+              <Typography variant="body2" fontWeight={500} noWrap>
                 {record.applicantName || "N/A"}
               </Typography>
-              <Typography variant="caption" color="textSecondary">
+              <Typography variant="caption" color="textSecondary" noWrap>
                 {record.applicantEmail || ""}
               </Typography>
             </Box>
@@ -425,22 +347,21 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Job Post"
-        sortable
-        sortBy="jobTitle"
+        sx={{ width: 180, minWidth: 180, maxWidth: 180 }}
         render={(record: any) => (
-          <Typography variant="body2">{record.jobTitle || "N/A"}</Typography>
+          <Typography variant="body2" noWrap>
+            {record.jobTitle || "N/A"}
+          </Typography>
         )}
       />
       <FunctionField
         label="Status"
-        sortable
-        sortBy="status"
+        sx={{ width: 120, minWidth: 120, maxWidth: 120 }}
         render={(record: any) => <EnhancedChip status={record.status} />}
       />
       <FunctionField
         label="Rating"
-        sortable
-        sortBy="rating"
+        sx={{ width: 150, minWidth: 150, maxWidth: 150 }}
         render={(record: any) =>
           record.rating ? (
             <Box display="flex" alignItems="center" gap={0.5}>
@@ -456,8 +377,7 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Has Video"
-        sortable
-        sortBy="hasVideo"
+        sx={{ width: 100, minWidth: 100, maxWidth: 100 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             {record.hasVideo && (
@@ -474,8 +394,7 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Interviews"
-        sortable
-        sortBy="interviewCount"
+        sx={{ width: 90, minWidth: 90, maxWidth: 90 }}
         render={(record: any) => (
           <Typography variant="body2">{record.interviewCount || 0}</Typography>
         )}
@@ -484,11 +403,13 @@ export const AdminApplicationList = () => (
         label="Applied"
         sortable
         sortBy="appliedAt"
+        sx={{ width: 130, minWidth: 130, maxWidth: 130 }}
         render={(record: any) => (
           <Box display="flex" alignItems="center" gap={0.5}>
             <CalendarToday sx={{ fontSize: 14, color: "text.secondary" }} />
             <Typography
               variant="body2"
+              noWrap
               title={new Date(record.appliedAt).toLocaleString()}
             >
               {formatRelativeTime(record.appliedAt)}
@@ -498,10 +419,10 @@ export const AdminApplicationList = () => (
       />
       <FunctionField
         label="Admin Actions"
+        sx={{ width: 200, minWidth: 200, maxWidth: 200 }}
         render={(record: any) => (
           <Box display="flex" gap={1}>
             <ShowButton />
-            {/* <UpdateNotesButton record={record} /> */}
             <UpdateRatingButton record={record} />
             <UpdateStatusButton record={record} />
           </Box>
@@ -620,6 +541,7 @@ export const AdminApplicationShow = () => (
                         src={record.mainVideoUrl}
                         controls
                         poster={record.thumbnailUrl}
+                        onError={(e) => { e.currentTarget.style.display = "none"; }}
                         style={{
                           width: "100%",
                           maxWidth: 800,
@@ -659,6 +581,7 @@ export const AdminApplicationShow = () => (
                           <video
                             src={answer.answerUrl}
                             controls
+                            onError={(e) => { e.currentTarget.style.display = "none"; }}
                             style={{ width: "100%", maxWidth: 600 }}
                           />
                         </Box>
@@ -696,25 +619,40 @@ export const AdminApplicationShow = () => (
       <Tab label="Rejection Feedback">
         <FunctionField
           label=""
-          render={(record: any) => (
-            <Box>
-              {record.rejectionFeedback ? (
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6">Rejection Feedback</Typography>
-                    <Divider sx={{ my: 1 }} />
-                    <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
-                      {record.rejectionFeedback}
-                    </Typography>
-                  </CardContent>
-                </Card>
-              ) : (
+          render={(record: any) => {
+            const feedback = record?.rejectionFeedback;
+
+            // If there's no feedback or it's not an object, show fallback
+            if (!feedback || typeof feedback !== "object") {
+              return (
                 <Typography color="textSecondary">
                   No rejection feedback
                 </Typography>
-              )}
-            </Box>
-          )}
+              );
+            }
+
+            // Only render string fields explicitly
+            const title =
+              typeof feedback.title === "string"
+                ? feedback.title
+                : "Rejection Feedback";
+            const responseText =
+              typeof feedback.responseText === "string"
+                ? feedback.responseText
+                : "No details provided";
+
+            return (
+              <Card>
+                <CardContent>
+                  <Typography variant="h6">{title}</Typography>
+                  <Divider sx={{ my: 1 }} />
+                  <Typography variant="body2" sx={{ whiteSpace: "pre-wrap" }}>
+                    {responseText}
+                  </Typography>
+                </CardContent>
+              </Card>
+            );
+          }}
         />
       </Tab>
 

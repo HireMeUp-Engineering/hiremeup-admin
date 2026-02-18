@@ -170,5 +170,79 @@ export const theme = createTheme({
         },
       },
     },
+    RaFilterForm: {
+      styleOverrides: {
+        root: {
+          display: 'flex',
+          alignItems: 'flex-end',
+          gap: '8px',
+          flexWrap: 'wrap',
+          '& .RaFilterFormInput-body': {
+            display: 'flex',
+            alignItems: 'flex-end',
+          },
+          '& .MuiFormControl-root': {
+            marginTop: 0,
+            marginBottom: 0,
+          },
+          '& .MuiInputBase-root': {
+            marginTop: 0,
+          },
+          '& .MuiFormHelperText-root': {
+            display: 'none',
+          },
+        },
+      },
+    },
+    RaFilterFormInput: {
+      styleOverrides: {
+        root: {
+          display: 'flex',
+          alignItems: 'flex-end',
+          '& .MuiFormControl-root': {
+            marginTop: 0,
+            marginBottom: 0,
+          },
+        },
+      },
+    },
+    RaList: {
+      styleOverrides: {
+        root: {
+          '& .RaList-actions': {
+            display: 'flex',
+            alignItems: 'flex-end',
+            minHeight: '56px',
+            paddingTop: '8px',
+            paddingBottom: '8px',
+          },
+        },
+      },
+    },
+    MuiFormControl: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputLabel-shrink': {
+            transform: 'translate(14px, -9px) scale(0.75)',
+          },
+        },
+      },
+    },
+    MuiTextField: {
+      styleOverrides: {
+        root: {
+          '& .MuiInputBase-root': {
+            minHeight: '40px',
+          },
+        },
+      },
+    },
+    MuiSelect: {
+      styleOverrides: {
+        root: {
+          minHeight: '40px',
+        },
+      },
+    },
   },
 });
