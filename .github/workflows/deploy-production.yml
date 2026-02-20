@@ -7,6 +7,10 @@ on:
         description: 'Type DEPLOY to confirm production deployment'
         required: true
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   deploy:
     name: Build and Deploy to Production S3
