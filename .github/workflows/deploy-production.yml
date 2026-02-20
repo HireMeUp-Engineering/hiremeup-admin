@@ -1,0 +1,75 @@
+name: Deploy to Production
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Type DEPLOY to confirm production deployment'
+        required: true
+
+jobs:
+  deploy:
+    name: Build and Deploy to Production S3
+    runs-on: ubuntu-latest
+    environment: production
+
+    steps:
+      - name: Verify confirmation
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" != "DEPLOY" ]; then
+            echo "❌ Production deployment cancelled"
+            echo "You must type 'DEPLOY' to confirm"
+            exit 1
+          fi
+          echo "✅ Production deployment confirmed"
+
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run lint and tests
+        run: |
+          npm run lint
+          CI=true npm test -- --watchAll=false
+
+      - name: Build
+        env:
+          REACT_APP_API_URL: https://api.hiremeup.com
+        run: npm run build
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_OIDC_ROLE_ARN_PRODUCTION }}
+          aws-region: us-east-1
+
+      - name: Deploy to S3
+        run: |
+          aws s3 sync build/ s3://hmu-admin-production-348862428756 --delete --region us-east-1
+
+      - name: Invalidate CloudFront cache
+        run: |
+          DISTRIBUTION_ID=$(aws cloudfront list-distributions \
+            --query "Distributions[?Origins[0].DomainName=='hmu-admin-production-348862428756.s3.us-east-1.amazonaws.com'].Id" \
+            --output text)
+          if [ -z "$DISTRIBUTION_ID" ]; then
+            echo "Warning: Could not find CloudFront distribution for production admin panel"
+          else
+            aws cloudfront create-invalidation \
+              --distribution-id "$DISTRIBUTION_ID" \
+              --paths "/*"
+          fi
+
+      - name: Deployment summary
+        run: |
+          echo "✅ Admin panel deployed to Production"
+          echo "📦 Bucket: hmu-admin-production-348862428756"
+          echo "🌐 URL: https://admin.hiremeup.com"
