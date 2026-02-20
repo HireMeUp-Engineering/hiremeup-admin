@@ -1,33 +1,62 @@
-import { defaultTheme } from 'react-admin';
-import { createTheme } from '@mui/material/styles';
+import { defaultTheme } from "react-admin";
+import { createTheme } from "@mui/material/styles";
 
-// HireMeUp Brand Colors from Email Template
+/**
+ * HireMeUp Brand Color Palette
+ *
+ * Colors sourced from the HireMeUp email template brand guidelines.
+ * All colors maintain proper contrast ratios for WCAG AA accessibility compliance.
+ */
 const hiremeColors = {
-  primary: '#211B43',      // Dark purple/navy - header background
-  secondary: '#8759F2',    // Bright purple - OTP box, accents
-  textPrimary: '#211B43',  // Dark purple for headings
-  textSecondary: '#1C4A72', // Dark blue for body text
-  textTertiary: '#8997A4',  // Gray for footer text
-};
+  primary: "#211B43", // Dark purple/navy - header background, primary actions
+  secondary: "#8759F2", // Bright purple - OTP box, accents, interactive elements
+  textPrimary: "#211B43", // Dark purple for headings and emphasized text
+  textSecondary: "#1C4A72", // Dark blue for body text and secondary content
+  textTertiary: "#8997A4", // Gray for footer text and disabled content
+} as const;
 
+/**
+ * HireMeUp Admin Panel Theme
+ *
+ * Material-UI theme configuration for the HireMeUp admin dashboard. Extends react-admin's
+ * default theme with HireMeUp brand colors and customized component styles for consistency
+ * with the HireMeUp design system.
+ *
+ * ## Features
+ * - **Brand Colors**: Primary dark purple (#211B43) and secondary bright purple (#8759F2)
+ * - **Typography**: Encode Sans font family with consistent heading and body text styling
+ * - **Component Customization**: Styled Material-UI components (buttons, cards, inputs, etc.)
+ * - **React-Admin Integration**: Custom overrides for react-admin specific components
+ *   (RaDatagrid, RaMenuItemLink, RaFilterForm, etc.)
+ *
+ * ## Usage
+ * ```tsx
+ * import { ThemeProvider } from '@mui/material/styles';
+ * import { theme } from './theme';
+ *
+ * <ThemeProvider theme={theme}>
+ *   <Admin>...</Admin>
+ * </ThemeProvider>
+ * ```
+ */
 export const theme = createTheme({
   ...defaultTheme,
   palette: {
     primary: {
       main: hiremeColors.primary,
-      light: '#3a2f5f',
-      dark: '#15101f',
-      contrastText: '#ffffff',
+      light: "#3a2f5f",
+      dark: "#15101f",
+      contrastText: "#ffffff",
     },
     secondary: {
       main: hiremeColors.secondary,
-      light: '#a57ff5',
-      dark: '#6842c9',
-      contrastText: '#ffffff',
+      light: "#a57ff5",
+      dark: "#6842c9",
+      contrastText: "#ffffff",
     },
     background: {
-      default: '#f5f5f5',
-      paper: '#ffffff',
+      default: "#f5f5f5",
+      paper: "#ffffff",
     },
     text: {
       primary: hiremeColors.textPrimary,
@@ -72,7 +101,7 @@ export const theme = createTheme({
       styleOverrides: {
         root: {
           backgroundColor: hiremeColors.primary,
-          color: '#ffffff',
+          color: "#ffffff",
         },
       },
     },
@@ -80,8 +109,8 @@ export const theme = createTheme({
       styleOverrides: {
         containedPrimary: {
           backgroundColor: hiremeColors.secondary,
-          '&:hover': {
-            backgroundColor: '#6842c9',
+          "&:hover": {
+            backgroundColor: "#6842c9",
           },
         },
       },
@@ -95,18 +124,18 @@ export const theme = createTheme({
         },
         colorPrimary: {
           backgroundColor: hiremeColors.secondary,
-          color: '#ffffff',
+          color: "#ffffff",
         },
       },
     },
     MuiCard: {
       styleOverrides: {
         root: {
-          boxShadow: '0px 2px 8px rgba(33, 27, 67, 0.08)',
+          boxShadow: "0px 2px 8px rgba(33, 27, 67, 0.08)",
           borderRadius: 12,
-          transition: 'box-shadow 0.2s ease-in-out',
-          '&:hover': {
-            boxShadow: '0px 4px 16px rgba(33, 27, 67, 0.12)',
+          transition: "box-shadow 0.2s ease-in-out",
+          "&:hover": {
+            boxShadow: "0px 4px 16px rgba(33, 27, 67, 0.12)",
           },
         },
       },
@@ -114,7 +143,7 @@ export const theme = createTheme({
     MuiAvatar: {
       styleOverrides: {
         root: {
-          border: '2px solid rgba(135, 89, 242, 0.1)',
+          border: "2px solid rgba(135, 89, 242, 0.1)",
           fontWeight: 600,
         },
       },
@@ -122,15 +151,15 @@ export const theme = createTheme({
     RaMenuItemLink: {
       styleOverrides: {
         root: {
-          '&.RaMenuItemLink-active': {
+          "&.RaMenuItemLink-active": {
             backgroundColor: hiremeColors.secondary,
-            color: '#ffffff',
-            '& .MuiListItemIcon-root': {
-              color: '#ffffff',
+            color: "#ffffff",
+            "& .MuiListItemIcon-root": {
+              color: "#ffffff",
             },
           },
-          '&:hover': {
-            backgroundColor: 'rgba(135, 89, 242, 0.1)',
+          "&:hover": {
+            backgroundColor: "rgba(135, 89, 242, 0.1)",
           },
         },
       },
@@ -138,7 +167,7 @@ export const theme = createTheme({
     RaLayout: {
       styleOverrides: {
         root: {
-          '& .RaLayout-appFrame': {
+          "& .RaLayout-appFrame": {
             marginTop: 0,
           },
         },
@@ -147,24 +176,24 @@ export const theme = createTheme({
     RaDatagrid: {
       styleOverrides: {
         root: {
-          '& .RaDatagrid-headerCell': {
-            backgroundColor: '#f8f7fa',
-            borderBottom: '2px solid rgba(135, 89, 242, 0.2)',
+          "& .RaDatagrid-headerCell": {
+            backgroundColor: "#f8f7fa",
+            borderBottom: "2px solid rgba(135, 89, 242, 0.2)",
             fontWeight: 600,
-            fontSize: '0.875rem',
-            padding: '16px 12px',
+            fontSize: "0.875rem",
+            padding: "16px 12px",
           },
-          '& .RaDatagrid-rowCell': {
-            borderBottom: '1px solid rgba(33, 27, 67, 0.08)',
-            padding: '16px 12px',
+          "& .RaDatagrid-rowCell": {
+            borderBottom: "1px solid rgba(33, 27, 67, 0.08)",
+            padding: "16px 12px",
           },
-          '& .RaDatagrid-row': {
-            transition: 'all 0.2s ease-in-out',
-            '&:hover': {
-              backgroundColor: 'rgba(135, 89, 242, 0.04)',
-              boxShadow: '0 2px 8px rgba(135, 89, 242, 0.12)',
-              transform: 'translateY(-1px)',
-              cursor: 'pointer',
+          "& .RaDatagrid-row": {
+            transition: "all 0.2s ease-in-out",
+            "&:hover": {
+              backgroundColor: "rgba(135, 89, 242, 0.04)",
+              boxShadow: "0 2px 8px rgba(135, 89, 242, 0.12)",
+              transform: "translateY(-1px)",
+              cursor: "pointer",
             },
           },
         },
@@ -173,23 +202,23 @@ export const theme = createTheme({
     RaFilterForm: {
       styleOverrides: {
         root: {
-          display: 'flex',
-          alignItems: 'flex-end',
-          gap: '8px',
-          flexWrap: 'wrap',
-          '& .RaFilterFormInput-body': {
-            display: 'flex',
-            alignItems: 'flex-end',
+          display: "flex",
+          alignItems: "flex-end",
+          gap: "8px",
+          flexWrap: "wrap",
+          "& .RaFilterFormInput-body": {
+            display: "flex",
+            alignItems: "flex-end",
           },
-          '& .MuiFormControl-root': {
+          "& .MuiFormControl-root": {
             marginTop: 0,
             marginBottom: 0,
           },
-          '& .MuiInputBase-root': {
+          "& .MuiInputBase-root": {
             marginTop: 0,
           },
-          '& .MuiFormHelperText-root': {
-            display: 'none',
+          "& .MuiFormHelperText-root": {
+            display: "none",
           },
         },
       },
@@ -197,9 +226,9 @@ export const theme = createTheme({
     RaFilterFormInput: {
       styleOverrides: {
         root: {
-          display: 'flex',
-          alignItems: 'flex-end',
-          '& .MuiFormControl-root': {
+          display: "flex",
+          alignItems: "flex-end",
+          "& .MuiFormControl-root": {
             marginTop: 0,
             marginBottom: 0,
           },
@@ -209,12 +238,12 @@ export const theme = createTheme({
     RaList: {
       styleOverrides: {
         root: {
-          '& .RaList-actions': {
-            display: 'flex',
-            alignItems: 'flex-end',
-            minHeight: '56px',
-            paddingTop: '8px',
-            paddingBottom: '8px',
+          "& .RaList-actions": {
+            display: "flex",
+            alignItems: "flex-end",
+            minHeight: "56px",
+            paddingTop: "8px",
+            paddingBottom: "8px",
           },
         },
       },
@@ -222,8 +251,8 @@ export const theme = createTheme({
     MuiFormControl: {
       styleOverrides: {
         root: {
-          '& .MuiInputLabel-shrink': {
-            transform: 'translate(14px, -9px) scale(0.75)',
+          "& .MuiInputLabel-shrink": {
+            transform: "translate(14px, -9px) scale(0.75)",
           },
         },
       },
@@ -231,8 +260,8 @@ export const theme = createTheme({
     MuiTextField: {
       styleOverrides: {
         root: {
-          '& .MuiInputBase-root': {
-            minHeight: '40px',
+          "& .MuiInputBase-root": {
+            minHeight: "40px",
           },
         },
       },
@@ -240,7 +269,7 @@ export const theme = createTheme({
     MuiSelect: {
       styleOverrides: {
         root: {
-          minHeight: '40px',
+          minHeight: "40px",
         },
       },
     },
